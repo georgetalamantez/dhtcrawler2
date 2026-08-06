@@ -48,6 +48,11 @@
                         <option value="desc">Newest First</option>
                         <option value="asc">Oldest First</option>
                     </select>
+                    <select id="search-limit" class="select select-bordered w-full md:w-32 text-base font-semibold">
+                        <option value="25">25 / page</option>
+                        <option value="50">50 / page</option>
+                        <option value="100">100 / page</option>
+                    </select>
                     <div class="join w-full">
                         <input type="text" id="search-input" placeholder="Search..." class="input input-bordered join-item w-full" autofocus />
                         <button type="submit" id="search-btn" class="btn btn-primary join-item">
@@ -64,8 +69,15 @@
             Found <span id="results-count" class="font-bold text-base-content">0</span> results across <span id="total-torrents-count" class="font-bold text-base-content">0</span> torrents indexed in <span id="results-time" class="font-bold text-base-content">0</span>ms.
         </div>
 
-        <div id="results-container" class="space-y-4">
+        <div id="results-container" class="space-y-4 mb-8">
             <!-- Results injected here -->
+        </div>
+
+        <!-- Pagination Area -->
+        <div id="pagination-container" class="flex justify-center mb-16 hidden">
+            <div class="join" id="pagination-join">
+                <!-- Pagination buttons injected here -->
+            </div>
         </div>
 
     </div>
@@ -75,12 +87,30 @@
         const input = document.getElementById('search-input');
         const typeSelect = document.getElementById('search-type');
         const sortSelect = document.getElementById('search-sort');
+        const limitSelect = document.getElementById('search-limit');
         const btn = document.getElementById('search-btn');
         const spinner = document.getElementById('search-spinner');
         const resultsContainer = document.getElementById('results-container');
         const resultsMeta = document.getElementById('results-meta');
         const resultsCount = document.getElementById('results-count');
         const resultsTime = document.getElementById('results-time');
+        const paginationContainer = document.getElementById('pagination-container');
+        const paginationJoin = document.getElementById('pagination-join');
+
+        let currentPage = 1;
+        let currentQuery = '';
+        let totalTorrents = 0;
+
+        // Load stats on startup
+        fetch('/api/stats')
+            .then(res => res.json())
+            .then(data => {
+                totalTorrents = data.torrents || 0;
+                const formattedTorrents = totalTorrents.toLocaleString();
+                document.getElementById('stats-text').textContent = `Searching across ${formattedTorrents} torrents in ${data.files} DB file(s).`;
+            }).catch(() => {
+                document.getElementById('stats-text').textContent = 'Backend offline.';
+            });
 
         // Format bytes to human readable
         function formatBytes(bytes, decimals = 2) {
@@ -112,22 +142,31 @@
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
 
-        form.addEventListener('submit', async (e) => {
+        form.addEventListener('submit', (e) => {
             e.preventDefault();
             const q = input.value.trim();
             if (!q) return;
+            currentQuery = q;
+            currentPage = 1;
+            performSearch();
+        });
+
+        async function performSearch() {
+            if (!currentQuery) return;
 
             const type = typeSelect.value;
             const sort = sortSelect.value;
+            const limit = limitSelect.value;
             
             // Set loading state
             btn.disabled = true;
             spinner.classList.remove('hidden');
             resultsContainer.innerHTML = '';
             resultsMeta.classList.add('hidden');
+            paginationContainer.classList.add('hidden');
 
             try {
-                const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&type=${type}&sort=${sort}`);
+                const res = await fetch(`/api/search?q=${encodeURIComponent(currentQuery)}&type=${type}&sort=${sort}&limit=${limit}&page=${currentPage}`);
                 const data = await res.json();
                 
                 resultsMeta.classList.remove('hidden');
@@ -157,7 +196,7 @@
                     let filesHtml = '';
                     if (item.Files && item.Files.length > 0) {
                         let innerFiles = item.Files.map(f => {
-                            let fPath = type === 'file' ? highlight(f.Path, q) : escapeHtml(f.Path);
+                            let fPath = type === 'file' ? highlight(f.Path, currentQuery) : escapeHtml(f.Path);
                             return `
                                 <div class="flex justify-between items-center py-1 border-b border-base-200 last:border-0 hover:bg-base-200 transition-colors px-2 rounded">
                                     <span class="text-sm truncate mr-4" title="${escapeHtml(f.Path)}">${fPath}</span>
@@ -182,8 +221,8 @@
                     }
 
                     const cats = (item.Categories || []).map(c => `<div class="badge badge-outline">${escapeHtml(c)}</div>`).join('');
-                    const nameHtml = type === 'name' ? highlight(item.Name, q) : escapeHtml(item.Name);
-                    const hashHtml = type === 'hash' ? highlight(item.InfoHash, q) : escapeHtml(item.InfoHash);
+                    const nameHtml = type === 'name' ? highlight(item.Name, currentQuery) : escapeHtml(item.Name);
+                    const hashHtml = type === 'hash' ? highlight(item.InfoHash, currentQuery) : escapeHtml(item.InfoHash);
 
                     card.innerHTML = `
                         <div class="card-body p-6">
@@ -212,6 +251,8 @@
                     resultsContainer.appendChild(card);
                 });
 
+                renderPagination(data.TotalPages, data.CurrentPage);
+
             } catch (err) {
                 console.error(err);
                 resultsContainer.innerHTML = `<div class="alert alert-error">Error fetching results: ${err.message}</div>`;
@@ -219,20 +260,71 @@
                 btn.disabled = false;
                 spinner.classList.add('hidden');
             }
-        });
+        }
 
-        let totalTorrents = 0;
+        function renderPagination(totalPages, current) {
+            if (totalPages <= 1) return;
+            
+            paginationContainer.classList.remove('hidden');
+            paginationJoin.innerHTML = '';
 
-        // Load stats on startup
-        fetch('/api/stats')
-            .then(res => res.json())
-            .then(data => {
-                totalTorrents = data.torrents || 0;
-                const formattedTorrents = totalTorrents.toLocaleString();
-                document.getElementById('stats-text').textContent = `Searching across ${formattedTorrents} torrents in ${data.files} DB file(s).`;
-            }).catch(() => {
-                document.getElementById('stats-text').textContent = 'Backend offline.';
-            });
+            // Previous Button
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'join-item btn';
+            if (current === 1) prevBtn.disabled = true;
+            prevBtn.textContent = '«';
+            prevBtn.onclick = () => { currentPage = current - 1; performSearch(); };
+            paginationJoin.appendChild(prevBtn);
+
+            // Page numbers
+            let startPage = Math.max(1, current - 2);
+            let endPage = Math.min(totalPages, current + 2);
+
+            if (startPage > 1) {
+                const firstBtn = document.createElement('button');
+                firstBtn.className = 'join-item btn';
+                firstBtn.textContent = '1';
+                firstBtn.onclick = () => { currentPage = 1; performSearch(); };
+                paginationJoin.appendChild(firstBtn);
+                
+                if (startPage > 2) {
+                    const dots = document.createElement('button');
+                    dots.className = 'join-item btn btn-disabled';
+                    dots.textContent = '...';
+                    paginationJoin.appendChild(dots);
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `join-item btn ${i === current ? 'btn-active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => { currentPage = i; performSearch(); };
+                paginationJoin.appendChild(pageBtn);
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const dots = document.createElement('button');
+                    dots.className = 'join-item btn btn-disabled';
+                    dots.textContent = '...';
+                    paginationJoin.appendChild(dots);
+                }
+                const lastBtn = document.createElement('button');
+                lastBtn.className = 'join-item btn';
+                lastBtn.textContent = totalPages;
+                lastBtn.onclick = () => { currentPage = totalPages; performSearch(); };
+                paginationJoin.appendChild(lastBtn);
+            }
+
+            // Next Button
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'join-item btn';
+            if (current === totalPages) nextBtn.disabled = true;
+            nextBtn.textContent = '»';
+            nextBtn.onclick = () => { currentPage = current + 1; performSearch(); };
+            paginationJoin.appendChild(nextBtn);
+        }
     </script>
 </body>
 </html>

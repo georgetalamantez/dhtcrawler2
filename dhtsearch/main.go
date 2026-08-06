@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -33,9 +35,12 @@ type Torrent struct {
 }
 
 type SearchResponse struct {
-	TimeMs int       `json:"TimeMs"`
-	Count  int       `json:"Count"`
-	Items  []Torrent `json:"Items"`
+	TimeMs      int       `json:"TimeMs"`
+	Count       int       `json:"Count"`
+	TotalPages  int       `json:"TotalPages"`
+	CurrentPage int       `json:"CurrentPage"`
+	Limit       int       `json:"Limit"`
+	Items       []Torrent `json:"Items"`
 }
 
 var dbDir = "../.db"
@@ -76,13 +81,24 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	q = strings.ToLower(q)
 
 	start := time.Now()
+
+	limitStr := r.URL.Query().Get("limit")
+	limit := 25
+	if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
+		limit = l
+	}
+
+	pageStr := r.URL.Query().Get("page")
+	page := 1
+	if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+		page = p
+	}
+
 	dbFiles := getDBFiles()
 
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 	var results []Torrent
-
-	limit := 100
 
 	for _, dbFile := range dbFiles {
 		wg.Add(1)
@@ -168,14 +184,26 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	totalCount := len(results)
-	if len(results) > limit {
-		results = results[:limit]
+	totalPages := int(math.Ceil(float64(totalCount) / float64(limit)))
+
+	offset := (page - 1) * limit
+	if offset > totalCount {
+		offset = totalCount
+	}
+	end := offset + limit
+	if end > totalCount {
+		end = totalCount
 	}
 
+	results = results[offset:end]
+
 	resp := SearchResponse{
-		TimeMs: int(time.Since(start).Milliseconds()),
-		Count:  totalCount,
-		Items:  results,
+		TimeMs:      int(time.Since(start).Milliseconds()),
+		Count:       totalCount,
+		TotalPages:  totalPages,
+		CurrentPage: page,
+		Limit:       limit,
+		Items:       results,
 	}
 
 	json.NewEncoder(w).Encode(resp)

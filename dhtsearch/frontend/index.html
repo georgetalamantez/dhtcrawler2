@@ -145,7 +145,7 @@
                     const card = document.createElement('div');
                     card.className = 'card bg-base-100 shadow-xl border border-base-300';
                     
-                    const date = new Date(item.DiscoveredOn).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                    const date = new Date(item.DiscoveredOn * 1000).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
                     const magnet = `magnet:?xt=urn:btih:${item.InfoHash}&dn=${encodeURIComponent(item.Name)}`;
                     
                     let filesHtml = '';

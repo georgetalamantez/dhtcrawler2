@@ -159,13 +159,14 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 		return results[i].DiscoveredOn > results[j].DiscoveredOn
 	})
 
+	totalCount := len(results)
 	if len(results) > limit {
 		results = results[:limit]
 	}
 
 	resp := SearchResponse{
 		TimeMs: int(time.Since(start).Milliseconds()),
-		Count:  len(results),
+		Count:  totalCount,
 		Items:  results,
 	}
 

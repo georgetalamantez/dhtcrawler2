@@ -17,7 +17,7 @@ load_hash(Conn) ->
 	% db.runCommand({findAndModify:"wait_download",query:{cached:{$ne:1}},update:{$inc:{cached:1}}})	
 	Cmd = {findAndModify, ?HASH_DOWNLOAD_COLL, query, {cached, {'$ne', 1}}, 
 		update, {'$set', {cached, 1}}, fields, {hash, 1}},
-	Ret = mongo:do(safe, master, Conn, ?HASH_DBNAME, fun() ->
+	Ret = mongo:do(unsafe, master, Conn, ?HASH_DBNAME, fun() ->
 		mongo:command(Cmd)
 	end),
 	case bson:lookup(value, Ret) of
@@ -39,7 +39,7 @@ save(Conn, MagHash, Content) ->
 
 % load a torrent file
 load(Conn, MagHash) when is_list(MagHash) ->
-	Ret = mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+	Ret = mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 		Sel = {'_id', list_to_binary(MagHash)},
 		mongo:find_one(?COLLNAME, Sel)
 	end),

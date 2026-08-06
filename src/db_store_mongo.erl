@@ -149,12 +149,12 @@ inc_announce(Conn, Hash, Inc) when is_list(Hash) ->
 	Ret = mongo_do(Conn, fun() ->
 		mongo:command(Cmd)
 	end),
-	case Ret of
-		{value, undefined, ok, 1.0} -> false;
-		{value, _Obj, lastErrorObject, {updatedExisting, true, n, 1}, ok, 1.0} -> 
+	case bson:lookup(value, Ret) of
+		{null} -> false;
+		{undefined} -> false;
+		{_Obj} -> 
 			db_daterange:insert(Conn, Hash, Inc, false),
-			true;
-		_ -> false
+			true
 	end.
 
 ensure_search_index(Conn) ->
@@ -172,11 +172,8 @@ ensure_date_index(Conn) ->
 	io:format("done~n", []).
 
 % not work
-enable_text_search(Conn) ->
-	Cmd = {setParameter, 1, textSearchEnabled, true},
-	mongo:do(safe, master, Conn, admin, fun() ->
-		mongo:command(Cmd)
-	end).
+enable_text_search(_Conn) ->
+	ok.
 
 create_torrent_desc(Hash, Name, Length, Announce, Files) ->
 	Base = {
@@ -213,10 +210,10 @@ find_exist(Conn, Hash) ->
 	end).
 
 mongo_do(Conn, Fun) ->
-	mongo:do(safe, master, Conn, ?DBNAME, Fun).
+	mongo:do(unsafe, master, Conn, ?DBNAME, Fun).
 
 mongo_do_slave(Conn, Fun) ->
-	mongo:do(safe, slave_ok, Conn, ?DBNAME, Fun).
+	mongo:do(unsafe, slave_ok, Conn, ?DBNAME, Fun).
 
 % TODO: replace this with {'_id', ID}
 hash_selector(Hash) ->
@@ -359,7 +356,7 @@ test_compile() ->
 % mongo_cursor:rest(Cursor)
 test_batch(Cnt) ->
 	Conn = mongo_pool:get(db_pool),
-	mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+	mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 		%Cursor = mongo:find(?COLLNAME, {}, [], 0, Cnt),
 		Cursor = mongo:find(?COLLNAME, {}, [], 0, -Cnt),
 		%mongo_cursor:take(Cursor, Cnt)

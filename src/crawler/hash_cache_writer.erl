@@ -110,7 +110,7 @@ do_save(Key, ReqAt) ->
 	Cmd = {findAndModify, ?HASH_COLLNAME, query, {'_id', BHash},
 		update, {'$inc', {req_cnt, ReqCnt}, '$set', {req_at, ReqAt}}, 
 		fields, {'_id', 1}, upsert, true, new, false},
-	Ret = mongo:do(safe, master, Conn, ?HASH_DBNAME, fun() ->
+	Ret = mongo:do(unsafe, master, Conn, ?HASH_DBNAME, fun() ->
 		mongo:command(Cmd)
 	end),
 	New = case Ret of
@@ -153,7 +153,7 @@ save_hashes(Conn, Docs, Pos) when Pos < length(Docs) ->
 	SubDocs = lists:sublist(Docs, Pos, ?BATCH_INSERT),
 	% `safe' may cause this process message queue increasing, but `unsafe' may cause the 
 	% database crashes.
-	mongo:do(safe, master, Conn, ?HASH_DBNAME, fun() ->
+	mongo:do(unsafe, master, Conn, ?HASH_DBNAME, fun() ->
 		mongo:insert(?HASH_COLLNAME, SubDocs)
 	end),
 	save_hashes(Conn, Docs, Pos + ?BATCH_INSERT);

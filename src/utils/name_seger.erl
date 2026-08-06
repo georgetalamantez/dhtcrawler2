@@ -146,7 +146,7 @@ save_result(Sum) ->
 	
 load_torrents_with_conn(Skip) ->
 	Conn = mongo_pool:get(?POOLNAME),
-	mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+	mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 		Cursor = mongo:find(?COLLNAME, {}, {}, Skip),
 		load_torrents(Cursor)
 	end).
@@ -172,7 +172,7 @@ do_process(Doc) ->
 	Torrent = db_store_mongo:decode_torrent_item(Doc),
 	{Hash, NameArray} = seg_torrent(Torrent),
 	Conn = mongo_pool:get(?POOLNAME),
-	mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+	mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 		commit(list_to_binary(Hash), NameArray)
 	end).
 

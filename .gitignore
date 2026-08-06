@@ -1,3 +1,9 @@
 deps
 *.swp
 bin
+.db/
+dhtsearch/*.json
+dhtsearch/test_*
+data/
+data4/
+*.zip

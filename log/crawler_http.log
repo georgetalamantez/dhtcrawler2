@@ -1,0 +1,2 @@
+info [14:54:44] {crawler_http, 53}: "httpd startup 8000"
+info [14:54:53] {http_handler, 29}: remote "127.0.0.1" search /test/

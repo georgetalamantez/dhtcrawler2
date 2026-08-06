@@ -93,7 +93,7 @@ do_save(DBPool, Docs) ->
 		Conn = mongo_pool:get(DBPool),
 		{ID} = bson:lookup('_id', Doc),
 		Sel = {'_id', ID},
-		mongo:do(safe, master, Conn, ?HASH_DBNAME, fun() ->
+		mongo:do(unsafe, master, Conn, ?HASH_DBNAME, fun() ->
 			mongo:update(?HASH_DOWNLOAD_COLL, Sel, Doc, true)
 		end)
 	end,

@@ -102,7 +102,7 @@ try_load_next(_, _) ->
 
 load_cursor(Skip, Size) ->
 	Conn = mongo_pool:get(?POOLNAME),
-	mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+	mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 		mongo:find(?COLLNAME, {}, {}, Skip, Size)
 	end).
 
@@ -122,7 +122,7 @@ load_next_batch(Cursor, Size) ->
 % will cause lots of queries
 do_load_torrents(Skip, Size) ->
 	Conn = mongo_pool:get(?POOLNAME),
-	mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+	mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 		% 1: cost lots of memory even close the cursor
 		%Cursor = mongo:find(?COLLNAME, {}, {}, Skip, Size),
 		%Ret = mongo_cursor:rest(Cursor), but close the cursor will reduce the memory

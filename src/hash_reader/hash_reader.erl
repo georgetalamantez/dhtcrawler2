@@ -216,7 +216,7 @@ got_torrent(State, Hash, multi, {Root, Files}) ->
 insert_to_download_wait(Conn, Doc) ->
 	{ID} = bson:lookup('_id', Doc), % lookup(hash, Doc)
 	Sel = {'_id', ID},
-	mongo:do(safe, master, Conn, ?HASH_DBNAME, fun() ->
+	mongo:do(unsafe, master, Conn, ?HASH_DBNAME, fun() ->
 		% may exist already
 		mongo:update(?HASH_DOWNLOAD_COLL, Sel, Doc, true)
 	end).
@@ -255,7 +255,7 @@ try_next(Conn) ->
 
 load_delete_next(Conn, Col) ->
 	Cmd = {findAndModify, Col, fields, {}, remove, true},
-	Ret = mongo:do(safe, master, Conn, ?HASH_DBNAME, fun() ->
+	Ret = mongo:do(unsafe, master, Conn, ?HASH_DBNAME, fun() ->
 		mongo:command(Cmd)
 	end),
 	case Ret of

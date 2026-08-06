@@ -1,0 +1,3517 @@
+<!DOCTYPE html>
+<!-- saved from url=(0074)http://localhost:4200/search?key=All&match-type=contains&search-input=flac -->
+<html lang="en" data-theme="dark" class="h-full"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>dhtc</title>
+    <link href="./dhtc2_files/style.css" rel="stylesheet">
+    <script>
+      const theme = localStorage.getItem("theme");
+      if (theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+      }
+
+      async function sendToDownloader(service, magnet) {
+        try {
+          const response = await fetch(
+            `/download/${service}?magnet=${encodeURIComponent(magnet)}`,
+          );
+          const data = await response.json();
+          if (response.ok) {
+            alert(data.message);
+          } else {
+            alert("Error: " + data.error);
+          }
+        } catch (error) {
+          alert("Error: " + error);
+        }
+      }
+    </script>
+    
+  </head>
+  <body class="flex flex-col min-h-screen bg-base-200">
+    
+<div class="navbar bg-base-100 shadow-lg sticky top-0 z-50">
+    <div class="navbar-start">
+        <div class="dropdown">
+            <label tabindex="0" class="btn btn-ghost lg:hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16"></path></svg>
+            </label>
+            <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                <li><a href="http://localhost:4200/dashboard">Dashboard</a></li>
+                <li><a href="http://localhost:4200/search">Search</a></li>
+                <li><a href="http://localhost:4200/discover">Discover</a></li>
+                <li><a href="http://localhost:4200/watches">Watches</a></li>
+                <li><a href="http://localhost:4200/blacklist">Blacklist</a></li>
+                <li><a href="http://localhost:4200/trawl">Trawl</a></li>
+                <li><a href="http://localhost:4200/settings">Settings</a></li>
+            </ul>
+        </div>
+        <a class="btn btn-ghost normal-case text-xl" href="http://localhost:4200/">dhtc</a>
+    </div>
+    <div class="navbar-center hidden lg:flex">
+        <ul class="menu menu-horizontal px-1 gap-1">
+            <li><a href="http://localhost:4200/dashboard" class="">Dashboard</a></li>
+            <li><a href="http://localhost:4200/search" class="active">Search</a></li>
+            <li><a href="http://localhost:4200/discover" class="">Discover</a></li>
+            <li><a href="http://localhost:4200/watches" class="">Watches</a></li>
+            <li><a href="http://localhost:4200/blacklist" class="">Blacklist</a></li>
+            <li><a href="http://localhost:4200/trawl" class="">Trawl</a></li>
+        </ul>
+    </div>
+    <div class="navbar-end">
+        <a href="http://localhost:4200/settings" class="btn btn-ghost btn-circle" title="Settings">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+        </a>
+    </div>
+</div>
+
+    <main class="flex-grow">
+<div class="container mx-auto p-4 md:p-8">
+    <div class="mb-8">
+        <h1 class="text-4xl font-extrabold tracking-tight">Search</h1>
+        <p class="text-base-content/60">Search through the collected torrent metadata</p>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl border border-base-300 mb-8">
+        <div class="card-body p-4 sm:p-6">
+            <form action="http://localhost:4200/search" method="post">
+                <div class="flex flex-col lg:flex-row gap-4 items-end mb-4">
+                    <div class="form-control w-full lg:w-48">
+                        <label class="label pt-0" for="search-key">
+                            <span class="label-text font-semibold">Field</span>
+                        </label>
+                        <select id="search-key" class="select select-bordered select-sm w-full pr-10" name="key">
+                            <option value="All" selected="">All</option>
+                            <option value="Name">Name</option>
+                            <option value="InfoHash">Info hash</option>
+                            <option value="Files">File name</option>
+                            <option value="DiscoveredOn">Date</option>
+                        </select>
+                    </div>
+
+                    <div class="form-control w-full lg:w-48">
+                        <label class="label pt-0" for="match-type">
+                            <span class="label-text font-semibold">Match Type</span>
+                        </label>
+                        <select id="match-type" class="select select-bordered select-sm w-full pr-10" name="match-type">
+                            <option value="contains" selected="">contains</option>
+                            <option value="equals">equals</option>
+                            <option value="startswith">starts with</option>
+                            <option value="endswith">ends with</option>
+                        </select>
+                    </div>
+
+                    <div class="form-control flex-grow w-full">
+                        <label class="label pt-0" for="search-input">
+                            <span class="label-text font-semibold">Search Query</span>
+                        </label>
+                        <div class="join w-full">
+                            <input id="search-input" type="text" placeholder="Search..." class="input input-bordered input-sm join-item w-full" name="search-input" value="flac">
+                            <button class="btn btn-primary btn-sm join-item px-6" type="submit">Search</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapse collapse-plus bg-base-200/30 border border-base-300 rounded-lg">
+                    <input id="advanced-filters-toggle" type="checkbox">
+                    <label for="advanced-filters-toggle" class="collapse-title text-sm font-medium py-2 min-h-0">
+                        Advanced Filters
+                    </label>
+                    <div class="collapse-content">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
+                            <div class="form-control w-full">
+                                <label class="label" for="min-size">
+                                    <span class="label-text text-xs">Min Size (bytes)</span>
+                                </label>
+                                <input id="min-size" type="number" name="min-size" class="input input-bordered input-sm" value="0">
+                            </div>
+                            <div class="form-control w-full">
+                                <label class="label" for="max-size">
+                                    <span class="label-text text-xs">Max Size (bytes)</span>
+                                </label>
+                                <input id="max-size" type="number" name="max-size" class="input input-bordered input-sm" value="0">
+                            </div>
+                            <div class="form-control w-full">
+                                <label class="label" for="start-date-val">
+                                    <span class="label-text text-xs">Start Date</span>
+                                </label>
+                                <input id="start-date-val" type="date" name="start-date-val" class="input input-bordered input-sm" value="">
+                            </div>
+                            <div class="form-control w-full">
+                                <label class="label" for="end-date-val">
+                                    <span class="label-text text-xs">End Date</span>
+                                </label>
+                                <input id="end-date-val" type="date" name="end-date-val" class="input input-bordered input-sm" value="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">Results (9)</h2>
+        </div>
+         
+<div class="card bg-base-100 shadow-xl overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="table table-zebra w-full sortable">
+      <thead>
+        <tr class="bg-base-300">
+          <th>Name</th>
+          <th class="hidden md:table-cell">Tags</th>
+          <th>Total size</th>
+          <th class="hidden lg:table-cell">File count</th>
+          <th class="hidden sm:table-cell">First seen</th>
+          <th class="text-right">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr class="hover group">
+          <td class="whitespace-normal break-all">
+            <div class="collapse collapse-arrow bg-base-200/50 hover:bg-base-200 transition-colors">
+              <input type="checkbox">
+              <div class="collapse-title p-2 min-h-0 flex items-center pr-10 font-medium">
+                Text Of Light - 2004 - Text Of Light
+              </div>
+              <div class="collapse-content p-2">
+                <div class="mt-2 rounded-lg overflow-x-auto border border-base-300">
+                  <table class="table table-xs w-full sortable">
+                    <thead>
+                      <tr class="bg-base-300">
+                        <th>Path</th>
+                        <th class="text-right">Size</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          01. Text of Light - 052202 Tonic.flac
+                        </td>
+                        <td data-sort="207720229" class="whitespace-nowrap text-right font-mono">
+                          198.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          02. Text of Light - 091502 Anthology Film Archives.flac
+                        </td>
+                        <td data-sort="122855921" class="whitespace-nowrap text-right font-mono">
+                          117.2 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          03. Text of Light - 082301 Knitting Factory.flac
+                        </td>
+                        <td data-sort="56119901" class="whitespace-nowrap text-right font-mono">
+                          53.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          folder.png
+                        </td>
+                        <td data-sort="322742" class="whitespace-nowrap text-right font-mono">
+                          315.2 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          Folder.summary
+                        </td>
+                        <td data-sort="2076" class="whitespace-nowrap text-right font-mono">
+                          2 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          release info.txt
+                        </td>
+                        <td data-sort="2423" class="whitespace-nowrap text-right font-mono">
+                          2.4 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          Text Of Light - Text Of Light.log
+                        </td>
+                        <td data-sort="2500" class="whitespace-nowrap text-right font-mono">
+                          2.4 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          Text Of Light - Text Of Light.m3u
+                        </td>
+                        <td data-sort="146" class="whitespace-nowrap text-right font-mono">
+                          146 bytes
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          Text Of Light.accurip
+                        </td>
+                        <td data-sort="572" class="whitespace-nowrap text-right font-mono">
+                          572 bytes
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          Text Of Light.cue
+                        </td>
+                        <td data-sort="694" class="whitespace-nowrap text-right font-mono">
+                          694 bytes
+                        </td>
+                      </tr>
+                      
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td class="hidden md:table-cell">
+            <div class="flex flex-wrap gap-1">
+              
+              <div class="badge badge-outline badge-sm">Document</div>
+              
+              <div class="badge badge-outline badge-sm">Audio</div>
+              
+              <div class="badge badge-outline badge-sm">Picture</div>
+              
+            </div>
+          </td>
+          <td data-sort="387027204" class="font-mono whitespace-nowrap">
+            369.1 MB
+          </td>
+          <td class="hidden lg:table-cell text-center">
+            10
+          </td>
+          <td class="hidden sm:table-cell whitespace-nowrap opacity-70">
+            06 Aug 26 05:17 CDT
+          </td>
+          <td class="text-right">
+            <div class="join join-vertical md:join-horizontal">
+              <a href="magnet:?xt=urn:btih:b9856b9fd7aa6e63f626d0b7e321da5ab6c01aba&amp;dn=Text%20Of%20Light%20-%202004%20-%20Text%20Of%20Light" class="btn btn-info btn-xs join-item" title="Open magnet link">Open</a>
+                 
+            </div>
+          </td>
+        </tr>
+        
+        <tr class="hover group">
+          <td class="whitespace-normal break-all">
+            <div class="collapse collapse-arrow bg-base-200/50 hover:bg-base-200 transition-colors">
+              <input type="checkbox">
+              <div class="collapse-title p-2 min-h-0 flex items-center pr-10 font-medium">
+                Eminem [LP]
+              </div>
+              <div class="collapse-content p-2">
+                <div class="mt-2 rounded-lg overflow-x-auto border border-base-300">
+                  <table class="table table-xs w-full sortable">
+                    <thead>
+                      <tr class="bg-base-300">
+                        <th>Path</th>
+                        <th class="text-right">Size</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          1999 - The Slim Shady LP/Eminem - The Slim Shady LP.cue
+                        </td>
+                        <td data-sort="1599" class="whitespace-nowrap text-right font-mono">
+                          1.6 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          1999 - The Slim Shady LP/Eminem - The Slim Shady LP.flac
+                        </td>
+                        <td data-sort="2198407523" class="whitespace-nowrap text-right font-mono">
+                          2 GB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2000 - The Marshall Mathers LP/Eminem - The Marshall Mathers LP LP1.flac
+                        </td>
+                        <td data-sort="1294541775" class="whitespace-nowrap text-right font-mono">
+                          1.2 GB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2000 - The Marshall Mathers LP/Eminem - The Marshall Mathers LP LP2.flac
+                        </td>
+                        <td data-sort="1400061978" class="whitespace-nowrap text-right font-mono">
+                          1.3 GB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2000 - The Marshall Mathers LP/Eminem - The Marshall Mathers LP.cue
+                        </td>
+                        <td data-sort="1549" class="whitespace-nowrap text-right font-mono">
+                          1.5 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2002 - The Eminem Show/Eminem - The Eminem Show LP1.flac
+                        </td>
+                        <td data-sort="1462405299" class="whitespace-nowrap text-right font-mono">
+                          1.4 GB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2002 - The Eminem Show/Eminem - The Eminem Show LP2.flac
+                        </td>
+                        <td data-sort="1404374856" class="whitespace-nowrap text-right font-mono">
+                          1.3 GB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2002 - The Eminem Show/Eminem - The Eminem Show.cue
+                        </td>
+                        <td data-sort="1693" class="whitespace-nowrap text-right font-mono">
+                          1.7 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2004 - Encore/Eminem - Encore LP1.flac
+                        </td>
+                        <td data-sort="1443124252" class="whitespace-nowrap text-right font-mono">
+                          1.3 GB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2004 - Encore/Eminem - Encore LP2.flac
+                        </td>
+                        <td data-sort="1402157472" class="whitespace-nowrap text-right font-mono">
+                          1.3 GB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2004 - Encore/Eminem - Encore.cue
+                        </td>
+                        <td data-sort="1628" class="whitespace-nowrap text-right font-mono">
+                          1.6 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2005 - Curtain Call The Hits/Eminem - Curtain Call The Hits LP1.flac
+                        </td>
+                        <td data-sort="1507594874" class="whitespace-nowrap text-right font-mono">
+                          1.4 GB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2005 - Curtain Call The Hits/Eminem - Curtain Call The Hits LP2.flac
+                        </td>
+                        <td data-sort="1381864791" class="whitespace-nowrap text-right font-mono">
+                          1.3 GB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2005 - Curtain Call The Hits/Eminem - Curtain Call The Hits.cue
+                        </td>
+                        <td data-sort="1400" class="whitespace-nowrap text-right font-mono">
+                          1.4 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2009 - Relapse/Eminem - Relapse LP1.flac
+                        </td>
+                        <td data-sort="1385013375" class="whitespace-nowrap text-right font-mono">
+                          1.3 GB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2009 - Relapse/Eminem - Relapse LP2.flac
+                        </td>
+                        <td data-sort="1441879612" class="whitespace-nowrap text-right font-mono">
+                          1.3 GB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2009 - Relapse/Eminem - Relapse.cue
+                        </td>
+                        <td data-sort="1554" class="whitespace-nowrap text-right font-mono">
+                          1.5 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2010 - Recovery/Eminem - Recovery LP1.flac
+                        </td>
+                        <td data-sort="1540452863" class="whitespace-nowrap text-right font-mono">
+                          1.4 GB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2010 - Recovery/Eminem - Recovery LP2.flac
+                        </td>
+                        <td data-sort="1388240408" class="whitespace-nowrap text-right font-mono">
+                          1.3 GB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2010 - Recovery/Eminem - Recovery.cue
+                        </td>
+                        <td data-sort="1367" class="whitespace-nowrap text-right font-mono">
+                          1.3 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2013 - The Marshall Mathers LP 2/Eminem - The Marshall Mathers LP 2 LP1.flac
+                        </td>
+                        <td data-sort="1360742894" class="whitespace-nowrap text-right font-mono">
+                          1.3 GB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2013 - The Marshall Mathers LP 2/Eminem - The Marshall Mathers LP 2 LP2.flac
+                        </td>
+                        <td data-sort="1672401501" class="whitespace-nowrap text-right font-mono">
+                          1.6 GB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2013 - The Marshall Mathers LP 2/Eminem - The Marshall Mathers LP 2.cue
+                        </td>
+                        <td data-sort="1396" class="whitespace-nowrap text-right font-mono">
+                          1.4 KB
+                        </td>
+                      </tr>
+                      
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td class="hidden md:table-cell">
+            <div class="flex flex-wrap gap-1">
+              
+              <div class="badge badge-outline badge-sm">Audio</div>
+              
+            </div>
+          </td>
+          <td data-sort="22283275659" class="font-mono whitespace-nowrap">
+            20.8 GB
+          </td>
+          <td class="hidden lg:table-cell text-center">
+            23
+          </td>
+          <td class="hidden sm:table-cell whitespace-nowrap opacity-70">
+            06 Aug 26 05:17 CDT
+          </td>
+          <td class="text-right">
+            <div class="join join-vertical md:join-horizontal">
+              <a href="magnet:?xt=urn:btih:4dd3750579fdfaf4000e6f744433d025192f9029&amp;dn=Eminem%20%5bLP%5d" class="btn btn-info btn-xs join-item" title="Open magnet link">Open</a>
+                 
+            </div>
+          </td>
+        </tr>
+        
+        <tr class="hover group">
+          <td class="whitespace-normal break-all">
+            <div class="collapse collapse-arrow bg-base-200/50 hover:bg-base-200 transition-colors">
+              <input type="checkbox">
+              <div class="collapse-title p-2 min-h-0 flex items-center pr-10 font-medium">
+                Queensryche - 1988 - Operation_Mindcrime [Remastered] (24bit-192kHz)
+              </div>
+              <div class="collapse-content p-2">
+                <div class="mt-2 rounded-lg overflow-x-auto border border-base-300">
+                  <table class="table table-xs w-full sortable">
+                    <thead>
+                      <tr class="bg-base-300">
+                        <th>Path</th>
+                        <th class="text-right">Size</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          01 - I Remember Now (Remastered 2003).flac
+                        </td>
+                        <td data-sort="52195010" class="whitespace-nowrap text-right font-mono">
+                          49.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          02 - Anarchy-X (Remastered 2003).flac
+                        </td>
+                        <td data-sort="66288460" class="whitespace-nowrap text-right font-mono">
+                          63.2 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          03 - Revolution Calling (Remastered 2003).flac
+                        </td>
+                        <td data-sort="210076997" class="whitespace-nowrap text-right font-mono">
+                          200.3 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          04 - Operation Mindcrime (Remastered 2003).flac
+                        </td>
+                        <td data-sort="215469677" class="whitespace-nowrap text-right font-mono">
+                          205.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          05 - Speak (Remastered 2003).flac
+                        </td>
+                        <td data-sort="170603474" class="whitespace-nowrap text-right font-mono">
+                          162.7 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          06 - Spreading The Disease (Remastered 2003).flac
+                        </td>
+                        <td data-sort="185512264" class="whitespace-nowrap text-right font-mono">
+                          176.9 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          07 - The Mission (Remastered 2003).flac
+                        </td>
+                        <td data-sort="260397328" class="whitespace-nowrap text-right font-mono">
+                          248.3 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          08 - Suite Sister Mary (Remastered 2003).flac
+                        </td>
+                        <td data-sort="467443876" class="whitespace-nowrap text-right font-mono">
+                          445.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          09 - The Needle Lies (Remastered 2003).flac
+                        </td>
+                        <td data-sort="143529823" class="whitespace-nowrap text-right font-mono">
+                          136.9 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          10 - Electric Requiem (Remastered 2003).flac
+                        </td>
+                        <td data-sort="59652349" class="whitespace-nowrap text-right font-mono">
+                          56.9 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          11 - Breaking The Silence (Remastered 2003).flac
+                        </td>
+                        <td data-sort="208943723" class="whitespace-nowrap text-right font-mono">
+                          199.3 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          12 - I Don't Believe In Love (Remastered 2003).flac
+                        </td>
+                        <td data-sort="199099648" class="whitespace-nowrap text-right font-mono">
+                          189.9 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          13 - Waiting For 22 (Remastered 2003).flac
+                        </td>
+                        <td data-sort="46566054" class="whitespace-nowrap text-right font-mono">
+                          44.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          14 - My Empty Room (Remastered 2003).flac
+                        </td>
+                        <td data-sort="64740356" class="whitespace-nowrap text-right font-mono">
+                          61.7 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          15 - Eyes Of A Stranger (Remastered 2003).flac
+                        </td>
+                        <td data-sort="297677305" class="whitespace-nowrap text-right font-mono">
+                          283.9 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          Cover.jpg
+                        </td>
+                        <td data-sort="2025161" class="whitespace-nowrap text-right font-mono">
+                          1.9 MB
+                        </td>
+                      </tr>
+                      
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td class="hidden md:table-cell">
+            <div class="flex flex-wrap gap-1">
+              
+              <div class="badge badge-outline badge-sm">Audio</div>
+              
+              <div class="badge badge-outline badge-sm">Picture</div>
+              
+            </div>
+          </td>
+          <td data-sort="2650221505" class="font-mono whitespace-nowrap">
+            2.5 GB
+          </td>
+          <td class="hidden lg:table-cell text-center">
+            16
+          </td>
+          <td class="hidden sm:table-cell whitespace-nowrap opacity-70">
+            06 Aug 26 05:16 CDT
+          </td>
+          <td class="text-right">
+            <div class="join join-vertical md:join-horizontal">
+              <a href="magnet:?xt=urn:btih:18a5431bab78ff566f761ea1260a9d6b4eb69335&amp;dn=Queensryche%20-%201988%20-%20Operation_Mindcrime%20%5bRemastered%5d%20%2824bit-192kHz%29" class="btn btn-info btn-xs join-item" title="Open magnet link">Open</a>
+                 
+            </div>
+          </td>
+        </tr>
+        
+        <tr class="hover group">
+          <td class="whitespace-normal break-all">
+            <div class="collapse collapse-arrow bg-base-200/50 hover:bg-base-200 transition-colors">
+              <input type="checkbox">
+              <div class="collapse-title p-2 min-h-0 flex items-center pr-10 font-medium">
+                FMMR 2001-08-10 THE ODEON MASTER
+              </div>
+              <div class="collapse-content p-2">
+                <div class="mt-2 rounded-lg overflow-x-auto border border-base-300">
+                  <table class="table table-xs w-full sortable">
+                    <thead>
+                      <tr class="bg-base-300">
+                        <th>Path</th>
+                        <th class="text-right">Size</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          01-Voodoo Chile.flac
+                        </td>
+                        <td data-sort="76967775" class="whitespace-nowrap text-right font-mono">
+                          73.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          02-Dragonfly.flac
+                        </td>
+                        <td data-sort="28925006" class="whitespace-nowrap text-right font-mono">
+                          27.6 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          03-The Answer.flac
+                        </td>
+                        <td data-sort="27959918" class="whitespace-nowrap text-right font-mono">
+                          26.7 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          04-Midnight Highway.flac
+                        </td>
+                        <td data-sort="20167787" class="whitespace-nowrap text-right font-mono">
+                          19.2 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          05-Red House.flac
+                        </td>
+                        <td data-sort="87844346" class="whitespace-nowrap text-right font-mono">
+                          83.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          06-He's Calling.flac
+                        </td>
+                        <td data-sort="88491149" class="whitespace-nowrap text-right font-mono">
+                          84.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          07-Stories Os A Hero.flac
+                        </td>
+                        <td data-sort="61342364" class="whitespace-nowrap text-right font-mono">
+                          58.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          08-Strange Universe.flac
+                        </td>
+                        <td data-sort="75819999" class="whitespace-nowrap text-right font-mono">
+                          72.3 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          09-Poppy.flac
+                        </td>
+                        <td data-sort="119058879" class="whitespace-nowrap text-right font-mono">
+                          113.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          10-Tales.flac
+                        </td>
+                        <td data-sort="40170354" class="whitespace-nowrap text-right font-mono">
+                          38.3 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          11-RNRHOF.flac
+                        </td>
+                        <td data-sort="83414973" class="whitespace-nowrap text-right font-mono">
+                          79.6 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          12-Drums.flac
+                        </td>
+                        <td data-sort="32636242" class="whitespace-nowrap text-right font-mono">
+                          31.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          13-Avalon.flac
+                        </td>
+                        <td data-sort="105656744" class="whitespace-nowrap text-right font-mono">
+                          100.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          14-Frank.flac
+                        </td>
+                        <td data-sort="158753621" class="whitespace-nowrap text-right font-mono">
+                          151.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          FMMR 2001-08-10 THE ODEON MASTER.ffp
+                        </td>
+                        <td data-sort="735" class="whitespace-nowrap text-right font-mono">
+                          735 bytes
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          FMMR Odeon 2001 DAT M.txt
+                        </td>
+                        <td data-sort="868" class="whitespace-nowrap text-right font-mono">
+                          868 bytes
+                        </td>
+                      </tr>
+                      
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td class="hidden md:table-cell">
+            <div class="flex flex-wrap gap-1">
+              
+              <div class="badge badge-outline badge-sm">Audio</div>
+              
+              <div class="badge badge-outline badge-sm">Document</div>
+              
+            </div>
+          </td>
+          <td data-sort="1007210760" class="font-mono whitespace-nowrap">
+            960.6 MB
+          </td>
+          <td class="hidden lg:table-cell text-center">
+            16
+          </td>
+          <td class="hidden sm:table-cell whitespace-nowrap opacity-70">
+            06 Aug 26 05:16 CDT
+          </td>
+          <td class="text-right">
+            <div class="join join-vertical md:join-horizontal">
+              <a href="magnet:?xt=urn:btih:6a4bdc0ee07982d0fdfccb40ebb3530a888e3af5&amp;dn=FMMR%202001-08-10%20THE%20ODEON%20MASTER" class="btn btn-info btn-xs join-item" title="Open magnet link">Open</a>
+                 
+            </div>
+          </td>
+        </tr>
+        
+        <tr class="hover group">
+          <td class="whitespace-normal break-all">
+            <div class="collapse collapse-arrow bg-base-200/50 hover:bg-base-200 transition-colors">
+              <input type="checkbox">
+              <div class="collapse-title p-2 min-h-0 flex items-center pr-10 font-medium">
+                Scars on Broadway
+              </div>
+              <div class="collapse-content p-2">
+                <div class="mt-2 rounded-lg overflow-x-auto border border-base-300">
+                  <table class="table table-xs w-full sortable">
+                    <thead>
+                      <tr class="bg-base-300">
+                        <th>Path</th>
+                        <th class="text-right">Size</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/01. Serious.flac
+                        </td>
+                        <td data-sort="14645019" class="whitespace-nowrap text-right font-mono">
+                          14 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/02. Funny.flac
+                        </td>
+                        <td data-sort="19816771" class="whitespace-nowrap text-right font-mono">
+                          18.9 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/03. ExplodingReloading.flac
+                        </td>
+                        <td data-sort="16563098" class="whitespace-nowrap text-right font-mono">
+                          15.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/04. Stoner Hate.flac
+                        </td>
+                        <td data-sort="14284375" class="whitespace-nowrap text-right font-mono">
+                          13.6 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/05. Insane.flac
+                        </td>
+                        <td data-sort="19777340" class="whitespace-nowrap text-right font-mono">
+                          18.9 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/06. World Long Gone.flac
+                        </td>
+                        <td data-sort="23573553" class="whitespace-nowrap text-right font-mono">
+                          22.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/07. Kill Each OtherLive Forever.flac
+                        </td>
+                        <td data-sort="20942825" class="whitespace-nowrap text-right font-mono">
+                          20 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/08. Babylon.flac
+                        </td>
+                        <td data-sort="24725638" class="whitespace-nowrap text-right font-mono">
+                          23.6 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/09. Chemicals.flac
+                        </td>
+                        <td data-sort="21363431" class="whitespace-nowrap text-right font-mono">
+                          20.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/10. Enemy.flac
+                        </td>
+                        <td data-sort="20655674" class="whitespace-nowrap text-right font-mono">
+                          19.7 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/11. Universe.flac
+                        </td>
+                        <td data-sort="27621779" class="whitespace-nowrap text-right font-mono">
+                          26.3 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/12. 3005.flac
+                        </td>
+                        <td data-sort="16529903" class="whitespace-nowrap text-right font-mono">
+                          15.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/13. Cute Machines.flac
+                        </td>
+                        <td data-sort="20440167" class="whitespace-nowrap text-right font-mono">
+                          19.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/14. Whoring Streets.flac
+                        </td>
+                        <td data-sort="17232908" class="whitespace-nowrap text-right font-mono">
+                          16.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/15. They Say.flac
+                        </td>
+                        <td data-sort="20324282" class="whitespace-nowrap text-right font-mono">
+                          19.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/16. Hungry Ghost [bonus track].flac
+                        </td>
+                        <td data-sort="21533608" class="whitespace-nowrap text-right font-mono">
+                          20.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/Artist.jpg
+                        </td>
+                        <td data-sort="85267" class="whitespace-nowrap text-right font-mono">
+                          83.3 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/Cover.jpg
+                        </td>
+                        <td data-sort="390283" class="whitespace-nowrap text-right font-mono">
+                          381.1 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2008 - Scars on Broadway [restored]/Scars on Broadway - Scars on Broadway.flac.cue
+                        </td>
+                        <td data-sort="2522" class="whitespace-nowrap text-right font-mono">
+                          2.5 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2018 - Dictator [restored]/01. Lives.flac
+                        </td>
+                        <td data-sort="31535866" class="whitespace-nowrap text-right font-mono">
+                          30.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2018 - Dictator [restored]/02. Angry Guru.flac
+                        </td>
+                        <td data-sort="27384847" class="whitespace-nowrap text-right font-mono">
+                          26.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2018 - Dictator [restored]/03. Dictator.flac
+                        </td>
+                        <td data-sort="21261415" class="whitespace-nowrap text-right font-mono">
+                          20.3 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2018 - Dictator [restored]/04. Fuck and Kill.flac
+                        </td>
+                        <td data-sort="24296779" class="whitespace-nowrap text-right font-mono">
+                          23.2 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2018 - Dictator [restored]/05. Guns Are Loaded.flac
+                        </td>
+                        <td data-sort="26591827" class="whitespace-nowrap text-right font-mono">
+                          25.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2018 - Dictator [restored]/06. Never Forget.flac
+                        </td>
+                        <td data-sort="23313266" class="whitespace-nowrap text-right font-mono">
+                          22.2 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2018 - Dictator [restored]/07. Talkin Shit.flac
+                        </td>
+                        <td data-sort="32355125" class="whitespace-nowrap text-right font-mono">
+                          30.9 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2018 - Dictator [restored]/08. Till the End.flac
+                        </td>
+                        <td data-sort="32767020" class="whitespace-nowrap text-right font-mono">
+                          31.2 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2018 - Dictator [restored]/09. We Won’t Obey.flac
+                        </td>
+                        <td data-sort="26742283" class="whitespace-nowrap text-right font-mono">
+                          25.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2018 - Dictator [restored]/10. Sickening Wars.flac
+                        </td>
+                        <td data-sort="16484283" class="whitespace-nowrap text-right font-mono">
+                          15.7 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2018 - Dictator [restored]/11. Gie Mou “My Son” [Stamatis Kokotas cover].flac
+                        </td>
+                        <td data-sort="16432242" class="whitespace-nowrap text-right font-mono">
+                          15.7 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2018 - Dictator [restored]/12. Assimilate [Skinny Puppy cover].flac
+                        </td>
+                        <td data-sort="26776782" class="whitespace-nowrap text-right font-mono">
+                          25.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2018 - Dictator [restored]/Artist.jpg
+                        </td>
+                        <td data-sort="78075" class="whitespace-nowrap text-right font-mono">
+                          76.2 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2018 - Dictator [restored]/Cover.jpg
+                        </td>
+                        <td data-sort="519934" class="whitespace-nowrap text-right font-mono">
+                          507.7 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2018 - Dictator [restored]/Daron Malakian and Scars on Broadway - Dictator.flac.cue
+                        </td>
+                        <td data-sort="2295" class="whitespace-nowrap text-right font-mono">
+                          2.2 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          Singles &amp; EP/2010 - Fucking [restored]/Artist.jpg
+                        </td>
+                        <td data-sort="32119" class="whitespace-nowrap text-right font-mono">
+                          31.4 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          Singles &amp; EP/2010 - Fucking [restored]/Cover.jpg
+                        </td>
+                        <td data-sort="471950" class="whitespace-nowrap text-right font-mono">
+                          460.9 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          Singles &amp; EP/2010 - Fucking [restored]/Scars on Broadway - Fucking.flac
+                        </td>
+                        <td data-sort="16690832" class="whitespace-nowrap text-right font-mono">
+                          15.9 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          Singles &amp; EP/2010 - Fucking [restored]/Scars on Broadway - Fucking.flac.cue
+                        </td>
+                        <td data-sort="138" class="whitespace-nowrap text-right font-mono">
+                          138 bytes
+                        </td>
+                      </tr>
+                      
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td class="hidden md:table-cell">
+            <div class="flex flex-wrap gap-1">
+              
+              <div class="badge badge-outline badge-sm">Audio</div>
+              
+              <div class="badge badge-outline badge-sm">Picture</div>
+              
+            </div>
+          </td>
+          <td data-sort="644245521" class="font-mono whitespace-nowrap">
+            614.4 MB
+          </td>
+          <td class="hidden lg:table-cell text-center">
+            38
+          </td>
+          <td class="hidden sm:table-cell whitespace-nowrap opacity-70">
+            06 Aug 26 05:16 CDT
+          </td>
+          <td class="text-right">
+            <div class="join join-vertical md:join-horizontal">
+              <a href="magnet:?xt=urn:btih:3505e3d5a2a07632a0bb04bdcde1c28b4626ec51&amp;dn=Scars%20on%20Broadway" class="btn btn-info btn-xs join-item" title="Open magnet link">Open</a>
+                 
+            </div>
+          </td>
+        </tr>
+        
+        <tr class="hover group">
+          <td class="whitespace-normal break-all">
+            <div class="collapse collapse-arrow bg-base-200/50 hover:bg-base-200 transition-colors">
+              <input type="checkbox">
+              <div class="collapse-title p-2 min-h-0 flex items-center pr-10 font-medium">
+                La Nuova Musica, David Bates - Gluck - Orfeo ed Euridice (2019) [24-96]
+              </div>
+              <div class="collapse-content p-2">
+                <div class="mt-2 rounded-lg overflow-x-auto border border-base-300">
+                  <table class="table table-xs w-full sortable">
+                    <thead>
+                      <tr class="bg-base-300">
+                        <th>Path</th>
+                        <th class="text-right">Size</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          43. Orfeo ed Euridice, Wq. 30, Act III Scene 3 Ballo-Trionfi Amore, e il mondo intero serva all'impero della beltà [Live].flac
+                        </td>
+                        <td data-sort="226331206" class="whitespace-nowrap text-right font-mono">
+                          215.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          02. Orfeo ed Euridice, Wq. 30, Act I Scene 1 Ah! Se intorno a quest'urna funesta [1] [Live].flac
+                        </td>
+                        <td data-sort="48576718" class="whitespace-nowrap text-right font-mono">
+                          46.3 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          03. Orfeo ed Euridice, Wq. 30, Act I Scene 1 Basta, basta, o compagni [Live].flac
+                        </td>
+                        <td data-sort="15026149" class="whitespace-nowrap text-right font-mono">
+                          14.3 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          04. Orfeo ed Euridice, Wq. 30, Act I Scene 1 Ballo. Larghetto [Live].flac
+                        </td>
+                        <td data-sort="39260306" class="whitespace-nowrap text-right font-mono">
+                          37.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          05. Orfeo ed Euridice, Wq. 30, Act I Scene 1 Ah! Se intorno a quest'urna funesta [2] [Live].flac
+                        </td>
+                        <td data-sort="36457694" class="whitespace-nowrap text-right font-mono">
+                          34.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          06. Orfeo ed Euridice, Wq. 30, Act I Scene 1 Chiamo il mio ben così [Live].flac
+                        </td>
+                        <td data-sort="22214680" class="whitespace-nowrap text-right font-mono">
+                          21.2 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          07. Orfeo ed Euridice, Wq. 30, Act I Scene 1 Euridice! Ombra cara, ove sei [Live].flac
+                        </td>
+                        <td data-sort="21112619" class="whitespace-nowrap text-right font-mono">
+                          20.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          08. Orfeo ed Euridice, Wq. 30, Act I Scene 1 Cerco il mio ben così [Live].flac
+                        </td>
+                        <td data-sort="22842680" class="whitespace-nowrap text-right font-mono">
+                          21.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          09. Orfeo ed Euridice, Wq. 30, Act I Scene 1 Euridice! Ah, questo nome san le spiagge [Live].flac
+                        </td>
+                        <td data-sort="21876703" class="whitespace-nowrap text-right font-mono">
+                          20.9 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          10. Orfeo ed Euridice, Wq. 30, Act I Scene 1 Piango il mio ben così [Live].flac
+                        </td>
+                        <td data-sort="21468954" class="whitespace-nowrap text-right font-mono">
+                          20.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          11. Orfeo ed Euridice, Wq. 30, Act I Scene 1 Numi! Barbari numi! [Live].flac
+                        </td>
+                        <td data-sort="17256368" class="whitespace-nowrap text-right font-mono">
+                          16.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          12. Orfeo ed Euridice, Wq. 30, Act I Scene 2 T'assiste Amore [Live].flac
+                        </td>
+                        <td data-sort="33987871" class="whitespace-nowrap text-right font-mono">
+                          32.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          13. Orfeo ed Euridice, Wq. 30, Act I Scene 2 Gli sguardi trattieni [Live].flac
+                        </td>
+                        <td data-sort="48400621" class="whitespace-nowrap text-right font-mono">
+                          46.2 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          14. Orfeo ed Euridice, Wq. 30, Act I Scene 2 Che disse! Che ascoltai! [Live].flac
+                        </td>
+                        <td data-sort="33512017" class="whitespace-nowrap text-right font-mono">
+                          32 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          15. Orfeo ed Euridice, Wq. 30, Act I Scene 2 Presto [Live].flac
+                        </td>
+                        <td data-sort="13439211" class="whitespace-nowrap text-right font-mono">
+                          12.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          16. Orfeo ed Euridice, Wq. 30, Act II Scene 1 Ballo [1] [Live].flac
+                        </td>
+                        <td data-sort="24743980" class="whitespace-nowrap text-right font-mono">
+                          23.6 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          17. Orfeo ed Euridice, Wq. 30, Act II Scene 1 Chi mai dell'Erebo [1] [Live].flac
+                        </td>
+                        <td data-sort="8780416" class="whitespace-nowrap text-right font-mono">
+                          8.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          18. Orfeo ed Euridice, Wq. 30, Act II Scene 1 Ballo [2] [Live].flac
+                        </td>
+                        <td data-sort="16101200" class="whitespace-nowrap text-right font-mono">
+                          15.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          19. Orfeo ed Euridice, Wq. 30, Act II Scene 1 Chi mai dell'Erebo [2] [Live].flac
+                        </td>
+                        <td data-sort="21540681" class="whitespace-nowrap text-right font-mono">
+                          20.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          20. Orfeo ed Euridice, Wq. 30, Act II Scene 1 Ballo [3] [Live].flac
+                        </td>
+                        <td data-sort="23941345" class="whitespace-nowrap text-right font-mono">
+                          22.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          21. Orfeo ed Euridice, Wq. 30, Act II Scene 1 Deh! Placatevi con me [Live].flac
+                        </td>
+                        <td data-sort="42435959" class="whitespace-nowrap text-right font-mono">
+                          40.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          22. Orfeo ed Euridice, Wq. 30, Act II Scene 1 Misero giovine! [Live].flac
+                        </td>
+                        <td data-sort="19025782" class="whitespace-nowrap text-right font-mono">
+                          18.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          23. Orfeo ed Euridice, Wq. 30, Act II Scene 1 Mille pene, ombre moleste [Live].flac
+                        </td>
+                        <td data-sort="14273598" class="whitespace-nowrap text-right font-mono">
+                          13.6 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          24. Orfeo ed Euridice, Wq. 30, Act II Scene 1 Ah, quale incognito affetto flebile [1] [Live].flac
+                        </td>
+                        <td data-sort="13455132" class="whitespace-nowrap text-right font-mono">
+                          12.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          25. Orfeo ed Euridice, Wq. 30, Act II Scene 1 Men tiranne, ah! Voi sareste [Live].flac
+                        </td>
+                        <td data-sort="12143314" class="whitespace-nowrap text-right font-mono">
+                          11.6 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          26. Orfeo ed Euridice, Wq. 30, Act II Scene 1 Ah, quale incognito affetto flebile [2] [Live].flac
+                        </td>
+                        <td data-sort="26283860" class="whitespace-nowrap text-right font-mono">
+                          25.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          27. Orfeo ed Euridice, Wq. 30, Act II Scene 2 Ballo [1] [Live].flac
+                        </td>
+                        <td data-sort="36874762" class="whitespace-nowrap text-right font-mono">
+                          35.2 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          28. Orfeo ed Euridice, Wq. 30, Act II Scene 2 Ballo [2] [Live].flac
+                        </td>
+                        <td data-sort="66733862" class="whitespace-nowrap text-right font-mono">
+                          63.6 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          29. Orfeo ed Euridice, Wq. 30, Act II Scene 2 Che puro ciel [1] [Live].flac
+                        </td>
+                        <td data-sort="92005167" class="whitespace-nowrap text-right font-mono">
+                          87.7 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          30. Orfeo ed Euridice, Wq. 30, Act II Scene 2 Vieni a' regni del riposo [Live].flac
+                        </td>
+                        <td data-sort="25588260" class="whitespace-nowrap text-right font-mono">
+                          24.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          31. Orfeo ed Euridice, Wq. 30, Act II Scene 2 Ballo [3] [Live].flac
+                        </td>
+                        <td data-sort="45506036" class="whitespace-nowrap text-right font-mono">
+                          43.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          32. Orfeo ed Euridice, Wq. 30, Act II Scene 2 Anime avventurose [Live].flac
+                        </td>
+                        <td data-sort="13447328" class="whitespace-nowrap text-right font-mono">
+                          12.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          33. Orfeo ed Euridice, Wq. 30, Act II Scene 2 Viene Euridice [Live].flac
+                        </td>
+                        <td data-sort="25322801" class="whitespace-nowrap text-right font-mono">
+                          24.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          34. Orfeo ed Euridice, Wq. 30, Act III Scene 1 Vieni, segui i miei passi [Live].flac
+                        </td>
+                        <td data-sort="109474856" class="whitespace-nowrap text-right font-mono">
+                          104.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          35. Orfeo ed Euridice, Wq. 30, Act III Scene 1 Ma vieni e taci! [Live].flac
+                        </td>
+                        <td data-sort="57457966" class="whitespace-nowrap text-right font-mono">
+                          54.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          36. Orfeo ed Euridice, Wq. 30, Act III Scene 1 Qual vita è questa mai [Live].flac
+                        </td>
+                        <td data-sort="37380279" class="whitespace-nowrap text-right font-mono">
+                          35.6 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          37. Orfeo ed Euridice, Wq. 30, Act III Scene 1 Che fiero momento! [Live].flac
+                        </td>
+                        <td data-sort="56699132" class="whitespace-nowrap text-right font-mono">
+                          54.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          38. Orfeo ed Euridice, Wq. 30, Act III Scene 1 Ecco un nuovo tormento! [Live].flac
+                        </td>
+                        <td data-sort="44627104" class="whitespace-nowrap text-right font-mono">
+                          42.6 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          39. Orfeo ed Euridice, Wq. 30, Act III Scene 1 Ahimè! Dove trascorsi! [Live].flac
+                        </td>
+                        <td data-sort="22939886" class="whitespace-nowrap text-right font-mono">
+                          21.9 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          40. Orfeo ed Euridice, Wq. 30, Act III Scene 1 Che farò senza Euridice! [Live].flac
+                        </td>
+                        <td data-sort="68204761" class="whitespace-nowrap text-right font-mono">
+                          65 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          41. Orfeo ed Euridice, Wq. 30, Act III Scene 1 Ma finisca, e per sempre, co' la vita il dolor! [Live].flac
+                        </td>
+                        <td data-sort="21651220" class="whitespace-nowrap text-right font-mono">
+                          20.6 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          42. Orfeo ed Euridice, Wq. 30, Act III Scene 2 Orfeo! Che fai [Live].flac
+                        </td>
+                        <td data-sort="34362977" class="whitespace-nowrap text-right font-mono">
+                          32.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          01. Orfeo ed Euridice, Wq. 30, Act I Scene 1 Overture [Live].flac
+                        </td>
+                        <td data-sort="61413719" class="whitespace-nowrap text-right font-mono">
+                          58.6 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          booklet.pdf
+                        </td>
+                        <td data-sort="4178970" class="whitespace-nowrap text-right font-mono">
+                          4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          Cover.jpg
+                        </td>
+                        <td data-sort="489866" class="whitespace-nowrap text-right font-mono">
+                          478.4 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          foo_dr.txt
+                        </td>
+                        <td data-sort="6114" class="whitespace-nowrap text-right font-mono">
+                          6 KB
+                        </td>
+                      </tr>
+                      
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td class="hidden md:table-cell">
+            <div class="flex flex-wrap gap-1">
+              
+              <div class="badge badge-outline badge-sm">Document</div>
+              
+              <div class="badge badge-outline badge-sm">Picture</div>
+              
+              <div class="badge badge-outline badge-sm">Audio</div>
+              
+            </div>
+          </td>
+          <td data-sort="1668854130" class="font-mono whitespace-nowrap">
+            1.6 GB
+          </td>
+          <td class="hidden lg:table-cell text-center">
+            46
+          </td>
+          <td class="hidden sm:table-cell whitespace-nowrap opacity-70">
+            06 Aug 26 05:15 CDT
+          </td>
+          <td class="text-right">
+            <div class="join join-vertical md:join-horizontal">
+              <a href="magnet:?xt=urn:btih:308820e5445f81f79f4cfb0672e9a9b73e6de0cd&amp;dn=La%20Nuova%20Musica%2c%20David%20Bates%20-%20Gluck%20-%20Orfeo%20ed%20Euridice%20%282019%29%20%5b24-96%5d" class="btn btn-info btn-xs join-item" title="Open magnet link">Open</a>
+                 
+            </div>
+          </td>
+        </tr>
+        
+        <tr class="hover group">
+          <td class="whitespace-normal break-all">
+            <div class="collapse collapse-arrow bg-base-200/50 hover:bg-base-200 transition-colors">
+              <input type="checkbox">
+              <div class="collapse-title p-2 min-h-0 flex items-center pr-10 font-medium">
+                Opeth - The Last Will and Testament (2024)
+              </div>
+              <div class="collapse-content p-2">
+                <div class="mt-2 rounded-lg overflow-x-auto border border-base-300">
+                  <table class="table table-xs w-full sortable">
+                    <thead>
+                      <tr class="bg-base-300">
+                        <th>Path</th>
+                        <th class="text-right">Size</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          05 - §5.flac
+                        </td>
+                        <td data-sort="53904462" class="whitespace-nowrap text-right font-mono">
+                          51.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          02 - §2.flac
+                        </td>
+                        <td data-sort="37548475" class="whitespace-nowrap text-right font-mono">
+                          35.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          03 - §3.flac
+                        </td>
+                        <td data-sort="37462708" class="whitespace-nowrap text-right font-mono">
+                          35.7 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          04 - §4.flac
+                        </td>
+                        <td data-sort="46401640" class="whitespace-nowrap text-right font-mono">
+                          44.3 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          01 - §1.flac
+                        </td>
+                        <td data-sort="39003396" class="whitespace-nowrap text-right font-mono">
+                          37.2 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          06 - §6.flac
+                        </td>
+                        <td data-sort="40462112" class="whitespace-nowrap text-right font-mono">
+                          38.6 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          07 - §7.flac
+                        </td>
+                        <td data-sort="44646564" class="whitespace-nowrap text-right font-mono">
+                          42.6 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          08 - A Story Never Told.flac
+                        </td>
+                        <td data-sort="42152921" class="whitespace-nowrap text-right font-mono">
+                          40.2 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          Cover.jpg
+                        </td>
+                        <td data-sort="6632333" class="whitespace-nowrap text-right font-mono">
+                          6.3 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          Opeth - The Last Will and Testament.log
+                        </td>
+                        <td data-sort="10112" class="whitespace-nowrap text-right font-mono">
+                          9.9 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          The Last Will and Testament.cue
+                        </td>
+                        <td data-sort="1391" class="whitespace-nowrap text-right font-mono">
+                          1.4 KB
+                        </td>
+                      </tr>
+                      
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td class="hidden md:table-cell">
+            <div class="flex flex-wrap gap-1">
+              
+              <div class="badge badge-outline badge-sm">Audio</div>
+              
+              <div class="badge badge-outline badge-sm">Picture</div>
+              
+            </div>
+          </td>
+          <td data-sort="348226114" class="font-mono whitespace-nowrap">
+            332.1 MB
+          </td>
+          <td class="hidden lg:table-cell text-center">
+            11
+          </td>
+          <td class="hidden sm:table-cell whitespace-nowrap opacity-70">
+            06 Aug 26 05:15 CDT
+          </td>
+          <td class="text-right">
+            <div class="join join-vertical md:join-horizontal">
+              <a href="magnet:?xt=urn:btih:328ca275161ddd8e2ae1a44e4ce4e447fdd2d87b&amp;dn=Opeth%20-%20The%20Last%20Will%20and%20Testament%20%282024%29" class="btn btn-info btn-xs join-item" title="Open magnet link">Open</a>
+                 
+            </div>
+          </td>
+        </tr>
+        
+        <tr class="hover group">
+          <td class="whitespace-normal break-all">
+            <div class="collapse collapse-arrow bg-base-200/50 hover:bg-base-200 transition-colors">
+              <input type="checkbox">
+              <div class="collapse-title p-2 min-h-0 flex items-center pr-10 font-medium">
+                0186_sebadoh2015-05-29
+              </div>
+              <div class="collapse-content p-2">
+                <div class="mt-2 rounded-lg overflow-x-auto border border-base-300">
+                  <table class="table table-xs w-full sortable">
+                    <thead>
+                      <tr class="bg-base-300">
+                        <th>Path</th>
+                        <th class="text-right">Size</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          0186_sebadoh2015-05-29_meta.sqlite
+                        </td>
+                        <td data-sort="151552" class="whitespace-nowrap text-right font-mono">
+                          148 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          0186_sebadoh2015-05-29_meta.xml
+                        </td>
+                        <td data-sort="3103" class="whitespace-nowrap text-right font-mono">
+                          3 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          __ia_thumb.jpg
+                        </td>
+                        <td data-sort="12717" class="whitespace-nowrap text-right font-mono">
+                          12.4 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          cover.jpg
+                        </td>
+                        <td data-sort="77913" class="whitespace-nowrap text-right font-mono">
+                          76.1 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          cover_thumb.jpg
+                        </td>
+                        <td data-sort="13640" class="whitespace-nowrap text-right font-mono">
+                          13.3 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          info AJC 0186 Sebadoh 2015-05-29.txt
+                        </td>
+                        <td data-sort="1079" class="whitespace-nowrap text-right font-mono">
+                          1.1 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29 fingerprint.ffp
+                        </td>
+                        <td data-sort="1547" class="whitespace-nowrap text-right font-mono">
+                          1.5 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t01.afpk
+                        </td>
+                        <td data-sort="13664" class="whitespace-nowrap text-right font-mono">
+                          13.3 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t01.flac
+                        </td>
+                        <td data-sort="7128799" class="whitespace-nowrap text-right font-mono">
+                          6.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t01.mp3
+                        </td>
+                        <td data-sort="2163650" class="whitespace-nowrap text-right font-mono">
+                          2.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t01.png
+                        </td>
+                        <td data-sort="20611" class="whitespace-nowrap text-right font-mono">
+                          20.1 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t01_spectrogram.png
+                        </td>
+                        <td data-sort="320498" class="whitespace-nowrap text-right font-mono">
+                          313 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t02.afpk
+                        </td>
+                        <td data-sort="41744" class="whitespace-nowrap text-right font-mono">
+                          40.8 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t02.flac
+                        </td>
+                        <td data-sort="23116268" class="whitespace-nowrap text-right font-mono">
+                          22 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t02.mp3
+                        </td>
+                        <td data-sort="4689501" class="whitespace-nowrap text-right font-mono">
+                          4.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t02.png
+                        </td>
+                        <td data-sort="38295" class="whitespace-nowrap text-right font-mono">
+                          37.4 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t02_spectrogram.png
+                        </td>
+                        <td data-sort="324560" class="whitespace-nowrap text-right font-mono">
+                          317 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t03.afpk
+                        </td>
+                        <td data-sort="55760" class="whitespace-nowrap text-right font-mono">
+                          54.5 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t03.flac
+                        </td>
+                        <td data-sort="27489971" class="whitespace-nowrap text-right font-mono">
+                          26.2 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t03.mp3
+                        </td>
+                        <td data-sort="6097002" class="whitespace-nowrap text-right font-mono">
+                          5.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t03.png
+                        </td>
+                        <td data-sort="38052" class="whitespace-nowrap text-right font-mono">
+                          37.2 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t03_spectrogram.png
+                        </td>
+                        <td data-sort="326920" class="whitespace-nowrap text-right font-mono">
+                          319.3 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t04.afpk
+                        </td>
+                        <td data-sort="29376" class="whitespace-nowrap text-right font-mono">
+                          28.7 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t04.flac
+                        </td>
+                        <td data-sort="16856281" class="whitespace-nowrap text-right font-mono">
+                          16.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t04.mp3
+                        </td>
+                        <td data-sort="3673931" class="whitespace-nowrap text-right font-mono">
+                          3.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t04.png
+                        </td>
+                        <td data-sort="36797" class="whitespace-nowrap text-right font-mono">
+                          35.9 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t04_spectrogram.png
+                        </td>
+                        <td data-sort="333910" class="whitespace-nowrap text-right font-mono">
+                          326.1 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t05.afpk
+                        </td>
+                        <td data-sort="49824" class="whitespace-nowrap text-right font-mono">
+                          48.7 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t05.flac
+                        </td>
+                        <td data-sort="27379863" class="whitespace-nowrap text-right font-mono">
+                          26.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t05.mp3
+                        </td>
+                        <td data-sort="6310208" class="whitespace-nowrap text-right font-mono">
+                          6 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t05.png
+                        </td>
+                        <td data-sort="36886" class="whitespace-nowrap text-right font-mono">
+                          36 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t05_spectrogram.png
+                        </td>
+                        <td data-sort="333769" class="whitespace-nowrap text-right font-mono">
+                          325.9 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t06.afpk
+                        </td>
+                        <td data-sort="65640" class="whitespace-nowrap text-right font-mono">
+                          64.1 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t06.flac
+                        </td>
+                        <td data-sort="35945206" class="whitespace-nowrap text-right font-mono">
+                          34.3 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t06.mp3
+                        </td>
+                        <td data-sort="8705753" class="whitespace-nowrap text-right font-mono">
+                          8.3 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t06.png
+                        </td>
+                        <td data-sort="32141" class="whitespace-nowrap text-right font-mono">
+                          31.4 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t06_spectrogram.png
+                        </td>
+                        <td data-sort="341959" class="whitespace-nowrap text-right font-mono">
+                          333.9 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t07.afpk
+                        </td>
+                        <td data-sort="48496" class="whitespace-nowrap text-right font-mono">
+                          47.4 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t07.flac
+                        </td>
+                        <td data-sort="26991248" class="whitespace-nowrap text-right font-mono">
+                          25.7 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t07.mp3
+                        </td>
+                        <td data-sort="6753712" class="whitespace-nowrap text-right font-mono">
+                          6.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t07.png
+                        </td>
+                        <td data-sort="31035" class="whitespace-nowrap text-right font-mono">
+                          30.3 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t07_spectrogram.png
+                        </td>
+                        <td data-sort="343250" class="whitespace-nowrap text-right font-mono">
+                          335.2 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t08.afpk
+                        </td>
+                        <td data-sort="35664" class="whitespace-nowrap text-right font-mono">
+                          34.8 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t08.flac
+                        </td>
+                        <td data-sort="17307607" class="whitespace-nowrap text-right font-mono">
+                          16.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t08.mp3
+                        </td>
+                        <td data-sort="3651986" class="whitespace-nowrap text-right font-mono">
+                          3.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t08.png
+                        </td>
+                        <td data-sort="41891" class="whitespace-nowrap text-right font-mono">
+                          40.9 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t08_spectrogram.png
+                        </td>
+                        <td data-sort="325392" class="whitespace-nowrap text-right font-mono">
+                          317.8 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t09.afpk
+                        </td>
+                        <td data-sort="36160" class="whitespace-nowrap text-right font-mono">
+                          35.3 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t09.flac
+                        </td>
+                        <td data-sort="18759677" class="whitespace-nowrap text-right font-mono">
+                          17.9 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t09.mp3
+                        </td>
+                        <td data-sort="4061726" class="whitespace-nowrap text-right font-mono">
+                          3.9 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t09.png
+                        </td>
+                        <td data-sort="39798" class="whitespace-nowrap text-right font-mono">
+                          38.9 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t09_spectrogram.png
+                        </td>
+                        <td data-sort="333002" class="whitespace-nowrap text-right font-mono">
+                          325.2 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t10.afpk
+                        </td>
+                        <td data-sort="53208" class="whitespace-nowrap text-right font-mono">
+                          52 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t10.flac
+                        </td>
+                        <td data-sort="27382643" class="whitespace-nowrap text-right font-mono">
+                          26.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t10.mp3
+                        </td>
+                        <td data-sort="5713655" class="whitespace-nowrap text-right font-mono">
+                          5.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t10.png
+                        </td>
+                        <td data-sort="39650" class="whitespace-nowrap text-right font-mono">
+                          38.7 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t10_spectrogram.png
+                        </td>
+                        <td data-sort="320714" class="whitespace-nowrap text-right font-mono">
+                          313.2 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t11.afpk
+                        </td>
+                        <td data-sort="31624" class="whitespace-nowrap text-right font-mono">
+                          30.9 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t11.flac
+                        </td>
+                        <td data-sort="16218443" class="whitespace-nowrap text-right font-mono">
+                          15.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t11.mp3
+                        </td>
+                        <td data-sort="3624443" class="whitespace-nowrap text-right font-mono">
+                          3.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t11.png
+                        </td>
+                        <td data-sort="34253" class="whitespace-nowrap text-right font-mono">
+                          33.5 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t11_spectrogram.png
+                        </td>
+                        <td data-sort="344801" class="whitespace-nowrap text-right font-mono">
+                          336.7 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t12.afpk
+                        </td>
+                        <td data-sort="49120" class="whitespace-nowrap text-right font-mono">
+                          48 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t12.flac
+                        </td>
+                        <td data-sort="25162497" class="whitespace-nowrap text-right font-mono">
+                          24 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t12.mp3
+                        </td>
+                        <td data-sort="5470888" class="whitespace-nowrap text-right font-mono">
+                          5.2 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t12.png
+                        </td>
+                        <td data-sort="40066" class="whitespace-nowrap text-right font-mono">
+                          39.1 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t12_spectrogram.png
+                        </td>
+                        <td data-sort="329616" class="whitespace-nowrap text-right font-mono">
+                          321.9 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t13.afpk
+                        </td>
+                        <td data-sort="81360" class="whitespace-nowrap text-right font-mono">
+                          79.5 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t13.flac
+                        </td>
+                        <td data-sort="38750462" class="whitespace-nowrap text-right font-mono">
+                          37 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t13.mp3
+                        </td>
+                        <td data-sort="9014508" class="whitespace-nowrap text-right font-mono">
+                          8.6 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t13.png
+                        </td>
+                        <td data-sort="36532" class="whitespace-nowrap text-right font-mono">
+                          35.7 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t13_spectrogram.png
+                        </td>
+                        <td data-sort="329957" class="whitespace-nowrap text-right font-mono">
+                          322.2 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t14.afpk
+                        </td>
+                        <td data-sort="80080" class="whitespace-nowrap text-right font-mono">
+                          78.2 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t14.flac
+                        </td>
+                        <td data-sort="40985668" class="whitespace-nowrap text-right font-mono">
+                          39.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t14.mp3
+                        </td>
+                        <td data-sort="10191311" class="whitespace-nowrap text-right font-mono">
+                          9.7 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t14.png
+                        </td>
+                        <td data-sort="33641" class="whitespace-nowrap text-right font-mono">
+                          32.9 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t14_spectrogram.png
+                        </td>
+                        <td data-sort="338100" class="whitespace-nowrap text-right font-mono">
+                          330.2 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t15.afpk
+                        </td>
+                        <td data-sort="45576" class="whitespace-nowrap text-right font-mono">
+                          44.5 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t15.flac
+                        </td>
+                        <td data-sort="25233091" class="whitespace-nowrap text-right font-mono">
+                          24.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t15.mp3
+                        </td>
+                        <td data-sort="5777408" class="whitespace-nowrap text-right font-mono">
+                          5.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t15.png
+                        </td>
+                        <td data-sort="39359" class="whitespace-nowrap text-right font-mono">
+                          38.4 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t15_spectrogram.png
+                        </td>
+                        <td data-sort="339815" class="whitespace-nowrap text-right font-mono">
+                          331.9 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t16.afpk
+                        </td>
+                        <td data-sort="41744" class="whitespace-nowrap text-right font-mono">
+                          40.8 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t16.flac
+                        </td>
+                        <td data-sort="23792434" class="whitespace-nowrap text-right font-mono">
+                          22.7 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t16.mp3
+                        </td>
+                        <td data-sort="5410050" class="whitespace-nowrap text-right font-mono">
+                          5.2 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t16.png
+                        </td>
+                        <td data-sort="38167" class="whitespace-nowrap text-right font-mono">
+                          37.3 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t16_spectrogram.png
+                        </td>
+                        <td data-sort="333798" class="whitespace-nowrap text-right font-mono">
+                          326 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t17.afpk
+                        </td>
+                        <td data-sort="34304" class="whitespace-nowrap text-right font-mono">
+                          33.5 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t17.flac
+                        </td>
+                        <td data-sort="18860329" class="whitespace-nowrap text-right font-mono">
+                          18 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t17.mp3
+                        </td>
+                        <td data-sort="3982827" class="whitespace-nowrap text-right font-mono">
+                          3.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t17.png
+                        </td>
+                        <td data-sort="42893" class="whitespace-nowrap text-right font-mono">
+                          41.9 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t17_spectrogram.png
+                        </td>
+                        <td data-sort="331000" class="whitespace-nowrap text-right font-mono">
+                          323.2 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t18.afpk
+                        </td>
+                        <td data-sort="60720" class="whitespace-nowrap text-right font-mono">
+                          59.3 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t18.flac
+                        </td>
+                        <td data-sort="31776424" class="whitespace-nowrap text-right font-mono">
+                          30.3 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t18.mp3
+                        </td>
+                        <td data-sort="7214307" class="whitespace-nowrap text-right font-mono">
+                          6.9 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t18.png
+                        </td>
+                        <td data-sort="36715" class="whitespace-nowrap text-right font-mono">
+                          35.9 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t18_spectrogram.png
+                        </td>
+                        <td data-sort="324701" class="whitespace-nowrap text-right font-mono">
+                          317.1 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t19.afpk
+                        </td>
+                        <td data-sort="41528" class="whitespace-nowrap text-right font-mono">
+                          40.6 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t19.flac
+                        </td>
+                        <td data-sort="23265857" class="whitespace-nowrap text-right font-mono">
+                          22.2 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t19.mp3
+                        </td>
+                        <td data-sort="5075079" class="whitespace-nowrap text-right font-mono">
+                          4.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t19.png
+                        </td>
+                        <td data-sort="38929" class="whitespace-nowrap text-right font-mono">
+                          38 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t19_spectrogram.png
+                        </td>
+                        <td data-sort="333017" class="whitespace-nowrap text-right font-mono">
+                          325.2 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t20.afpk
+                        </td>
+                        <td data-sort="76488" class="whitespace-nowrap text-right font-mono">
+                          74.7 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t20.flac
+                        </td>
+                        <td data-sort="38386535" class="whitespace-nowrap text-right font-mono">
+                          36.6 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t20.mp3
+                        </td>
+                        <td data-sort="9646753" class="whitespace-nowrap text-right font-mono">
+                          9.2 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t20.png
+                        </td>
+                        <td data-sort="32767" class="whitespace-nowrap text-right font-mono">
+                          32 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t20_spectrogram.png
+                        </td>
+                        <td data-sort="335943" class="whitespace-nowrap text-right font-mono">
+                          328.1 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t21.afpk
+                        </td>
+                        <td data-sort="35208" class="whitespace-nowrap text-right font-mono">
+                          34.4 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t21.flac
+                        </td>
+                        <td data-sort="17941979" class="whitespace-nowrap text-right font-mono">
+                          17.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t21.mp3
+                        </td>
+                        <td data-sort="4668579" class="whitespace-nowrap text-right font-mono">
+                          4.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t21.png
+                        </td>
+                        <td data-sort="26833" class="whitespace-nowrap text-right font-mono">
+                          26.2 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t21_spectrogram.png
+                        </td>
+                        <td data-sort="338103" class="whitespace-nowrap text-right font-mono">
+                          330.2 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t22.afpk
+                        </td>
+                        <td data-sort="48880" class="whitespace-nowrap text-right font-mono">
+                          47.7 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t22.flac
+                        </td>
+                        <td data-sort="26267772" class="whitespace-nowrap text-right font-mono">
+                          25.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t22.mp3
+                        </td>
+                        <td data-sort="6120703" class="whitespace-nowrap text-right font-mono">
+                          5.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t22.png
+                        </td>
+                        <td data-sort="35760" class="whitespace-nowrap text-right font-mono">
+                          34.9 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t22_spectrogram.png
+                        </td>
+                        <td data-sort="335153" class="whitespace-nowrap text-right font-mono">
+                          327.3 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t23.afpk
+                        </td>
+                        <td data-sort="39128" class="whitespace-nowrap text-right font-mono">
+                          38.2 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t23.flac
+                        </td>
+                        <td data-sort="19781612" class="whitespace-nowrap text-right font-mono">
+                          18.9 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t23.mp3
+                        </td>
+                        <td data-sort="4931601" class="whitespace-nowrap text-right font-mono">
+                          4.7 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t23.png
+                        </td>
+                        <td data-sort="30815" class="whitespace-nowrap text-right font-mono">
+                          30.1 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t23_spectrogram.png
+                        </td>
+                        <td data-sort="342959" class="whitespace-nowrap text-right font-mono">
+                          334.9 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t24.afpk
+                        </td>
+                        <td data-sort="46280" class="whitespace-nowrap text-right font-mono">
+                          45.2 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t24.flac
+                        </td>
+                        <td data-sort="21818306" class="whitespace-nowrap text-right font-mono">
+                          20.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t24.mp3
+                        </td>
+                        <td data-sort="5355491" class="whitespace-nowrap text-right font-mono">
+                          5.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t24.png
+                        </td>
+                        <td data-sort="35092" class="whitespace-nowrap text-right font-mono">
+                          34.3 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t24_spectrogram.png
+                        </td>
+                        <td data-sort="341115" class="whitespace-nowrap text-right font-mono">
+                          333.1 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t25.afpk
+                        </td>
+                        <td data-sort="66328" class="whitespace-nowrap text-right font-mono">
+                          64.8 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t25.flac
+                        </td>
+                        <td data-sort="33585565" class="whitespace-nowrap text-right font-mono">
+                          32 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t25.mp3
+                        </td>
+                        <td data-sort="7463442" class="whitespace-nowrap text-right font-mono">
+                          7.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t25.png
+                        </td>
+                        <td data-sort="39878" class="whitespace-nowrap text-right font-mono">
+                          38.9 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          sebadoh2015-05-29t25_spectrogram.png
+                        </td>
+                        <td data-sort="324844" class="whitespace-nowrap text-right font-mono">
+                          317.2 KB
+                        </td>
+                      </tr>
+                      
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td class="hidden md:table-cell">
+            <div class="flex flex-wrap gap-1">
+              
+              <div class="badge badge-outline badge-sm">Picture</div>
+              
+              <div class="badge badge-outline badge-sm">Document</div>
+              
+              <div class="badge badge-outline badge-sm">Audio</div>
+              
+            </div>
+          </td>
+          <td data-sort="786646258" class="font-mono whitespace-nowrap">
+            750.2 MB
+          </td>
+          <td class="hidden lg:table-cell text-center">
+            132
+          </td>
+          <td class="hidden sm:table-cell whitespace-nowrap opacity-70">
+            06 Aug 26 05:15 CDT
+          </td>
+          <td class="text-right">
+            <div class="join join-vertical md:join-horizontal">
+              <a href="magnet:?xt=urn:btih:b0d2ee9f88f0e6c55901670c68aec75f8751e1a0&amp;dn=0186_sebadoh2015-05-29" class="btn btn-info btn-xs join-item" title="Open magnet link">Open</a>
+                 
+            </div>
+          </td>
+        </tr>
+        
+        <tr class="hover group">
+          <td class="whitespace-normal break-all">
+            <div class="collapse collapse-arrow bg-base-200/50 hover:bg-base-200 transition-colors">
+              <input type="checkbox">
+              <div class="collapse-title p-2 min-h-0 flex items-center pr-10 font-medium">
+                Ulrich Schnauss - A Long Way To Fall
+              </div>
+              <div class="collapse-content p-2">
+                <div class="mt-2 rounded-lg overflow-x-auto border border-base-300">
+                  <table class="table table-xs w-full sortable">
+                    <thead>
+                      <tr class="bg-base-300">
+                        <th>Path</th>
+                        <th class="text-right">Size</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          06. A Forgotten Birthday.flac
+                        </td>
+                        <td data-sort="47839286" class="whitespace-nowrap text-right font-mono">
+                          45.6 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          10. A Ritual In Time And Death.flac
+                        </td>
+                        <td data-sort="46119972" class="whitespace-nowrap text-right font-mono">
+                          44 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          04. A Long Way To Fall.flac
+                        </td>
+                        <td data-sort="43533595" class="whitespace-nowrap text-right font-mono">
+                          41.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          02. Broken Homes.flac
+                        </td>
+                        <td data-sort="43231279" class="whitespace-nowrap text-right font-mono">
+                          41.2 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          09. Ten Years.flac
+                        </td>
+                        <td data-sort="42348826" class="whitespace-nowrap text-right font-mono">
+                          40.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          03. Like A Ghost In Your Own Life.flac
+                        </td>
+                        <td data-sort="42002384" class="whitespace-nowrap text-right font-mono">
+                          40.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          05. I Take Comfort In Your Ignorance.flac
+                        </td>
+                        <td data-sort="40776487" class="whitespace-nowrap text-right font-mono">
+                          38.9 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          07. The Weight Of Darkening Skies.flac
+                        </td>
+                        <td data-sort="39832371" class="whitespace-nowrap text-right font-mono">
+                          38 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          08. Borrowed Time.flac
+                        </td>
+                        <td data-sort="34438918" class="whitespace-nowrap text-right font-mono">
+                          32.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          01. Her And The Sea.flac
+                        </td>
+                        <td data-sort="32883146" class="whitespace-nowrap text-right font-mono">
+                          31.4 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          10.jpg
+                        </td>
+                        <td data-sort="3657106" class="whitespace-nowrap text-right font-mono">
+                          3.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          3.jpg
+                        </td>
+                        <td data-sort="3418640" class="whitespace-nowrap text-right font-mono">
+                          3.3 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          1.jpg
+                        </td>
+                        <td data-sort="3408283" class="whitespace-nowrap text-right font-mono">
+                          3.3 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          8.jpg
+                        </td>
+                        <td data-sort="3255700" class="whitespace-nowrap text-right font-mono">
+                          3.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          5.jpg
+                        </td>
+                        <td data-sort="3227030" class="whitespace-nowrap text-right font-mono">
+                          3.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          6.jpg
+                        </td>
+                        <td data-sort="3217428" class="whitespace-nowrap text-right font-mono">
+                          3.1 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          4.jpg
+                        </td>
+                        <td data-sort="3182057" class="whitespace-nowrap text-right font-mono">
+                          3 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          2.jpg
+                        </td>
+                        <td data-sort="2958425" class="whitespace-nowrap text-right font-mono">
+                          2.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          9.jpg
+                        </td>
+                        <td data-sort="2947406" class="whitespace-nowrap text-right font-mono">
+                          2.8 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          7.jpg
+                        </td>
+                        <td data-sort="2594649" class="whitespace-nowrap text-right font-mono">
+                          2.5 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          front.jpg
+                        </td>
+                        <td data-sort="2432843" class="whitespace-nowrap text-right font-mono">
+                          2.3 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          back.jpg
+                        </td>
+                        <td data-sort="2077674" class="whitespace-nowrap text-right font-mono">
+                          2 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          CD page.jpg
+                        </td>
+                        <td data-sort="1770169" class="whitespace-nowrap text-right font-mono">
+                          1.7 MB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          title.jpg
+                        </td>
+                        <td data-sort="284649" class="whitespace-nowrap text-right font-mono">
+                          278 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          Ulrich Schnauss - A Long Way To Fall.log
+                        </td>
+                        <td data-sort="4949" class="whitespace-nowrap text-right font-mono">
+                          4.8 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          A Long Way To Fall.cue
+                        </td>
+                        <td data-sort="1901" class="whitespace-nowrap text-right font-mono">
+                          1.9 KB
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td class="whitespace-normal break-all opacity-80">
+                          Ulrich Schnauss - A Long Way To Fall.m3u
+                        </td>
+                        <td data-sort="313" class="whitespace-nowrap text-right font-mono">
+                          313 bytes
+                        </td>
+                      </tr>
+                      
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td class="hidden md:table-cell">
+            <div class="flex flex-wrap gap-1">
+              
+              <div class="badge badge-outline badge-sm">Audio</div>
+              
+              <div class="badge badge-outline badge-sm">Picture</div>
+              
+            </div>
+          </td>
+          <td data-sort="451445486" class="font-mono whitespace-nowrap">
+            430.5 MB
+          </td>
+          <td class="hidden lg:table-cell text-center">
+            27
+          </td>
+          <td class="hidden sm:table-cell whitespace-nowrap opacity-70">
+            06 Aug 26 05:15 CDT
+          </td>
+          <td class="text-right">
+            <div class="join join-vertical md:join-horizontal">
+              <a href="magnet:?xt=urn:btih:c16117b2e96a6de19200620c15f1180ea1a28b4e&amp;dn=Ulrich%20Schnauss%20-%20A%20Long%20Way%20To%20Fall" class="btn btn-info btn-xs join-item" title="Open magnet link">Open</a>
+                 
+            </div>
+          </td>
+        </tr>
+        
+      </tbody>
+    </table>
+  </div>
+</div>
+ 
+          
+    
+</div>
+</main>
+  
+  
+<script src="./dhtc2_files/sortable.min.js.download"></script>
+
+
+
+</body></html>

@@ -16,13 +16,13 @@ insert(Conn, Hash) when is_list(Hash) ->
 
 do_insert(Conn, Hash) ->
 	Doc = {'_id', list_to_binary(Hash)},
-	mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+	mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 		mongo:insert(?COLLNAME, Doc)
 	end).
 
 exist(Conn, Hash) when is_list(Hash) ->
 	Sel = {'_id', list_to_binary(Hash)},
-	Doc = mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+	Doc = mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 		mongo:find_one(?COLLNAME, Sel)
 	end),
 	Doc /= {}.

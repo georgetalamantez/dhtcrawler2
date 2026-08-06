@@ -25,7 +25,7 @@
 get_torrent_id(Conn) ->
 	Cmd = {findAndModify, ?COLLNAME, query, {'_id', ?TORRENT_ID_KEY},
 		update, {'$inc', {seed, 1}}, new, true, upsert, true},
-	Ret = mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+	Ret = mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 		mongo:command(Cmd)
 	end),
 	case bson:lookup(value, Ret) of
@@ -48,7 +48,7 @@ inc_batch_windex(Conn) ->
 inc_batch_index(Conn, Col) ->
 	Cmd = {findAndModify, ?COLLNAME, query, {'_id', ?HASH_BATCH_KEY}, 
 		update, {'$inc', {Col, 1}}, new, true},
-	mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+	mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 		mongo:command(Cmd)
 	end).
 
@@ -56,7 +56,7 @@ load_batch_index(Conn) ->
 	Doc = case find_exist_batch_index(Conn) of
 		{} ->
 			NewDoc = create_batch_index(0, 0),
-			mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+			mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 				mongo:insert(?COLLNAME, NewDoc)
 			end),
 			NewDoc;
@@ -68,7 +68,7 @@ load_batch_index(Conn) ->
 	{RIndex, WIndex}.
 
 find_exist_batch_index(Conn) ->
-	mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+	mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 		mongo:find_one(?COLLNAME, {'_id', ?HASH_BATCH_KEY})
 	end).
 
@@ -103,12 +103,12 @@ stats_inc_field(Conn, Field, Inc) ->
 	TodaySecs = time_util:now_day_seconds(),
 	Cmd = {findAndModify, ?STATS_COLLNAME, query, {'_id', TodaySecs}, 
 		upsert, true, update, {'$inc', {Field, Inc}}, field, {'_id', 1}},
-	mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+	mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 		mongo:command(Cmd)
 	end).
 
 stats_day_at_slave(Conn, DaySec) ->
-	Ret = mongo:do(safe, slave_ok, Conn, ?DBNAME, fun() ->
+	Ret = mongo:do(unsafe, slave_ok, Conn, ?DBNAME, fun() ->
 		mongo:find_one(?STATS_COLLNAME, {'_id', DaySec})
 	end),
 	case Ret of

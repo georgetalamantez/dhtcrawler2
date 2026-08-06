@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<!-- saved from url=(0028)http://localhost:4200/search -->
+<html lang="en" data-theme="dark" class="h-full"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>dhtc</title>
+    <link href="./dhtc_files/style.css" rel="stylesheet">
+    <script>
+      const theme = localStorage.getItem("theme");
+      if (theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+      }
+
+      async function sendToDownloader(service, magnet) {
+        try {
+          const response = await fetch(
+            `/download/${service}?magnet=${encodeURIComponent(magnet)}`,
+          );
+          const data = await response.json();
+          if (response.ok) {
+            alert(data.message);
+          } else {
+            alert("Error: " + data.error);
+          }
+        } catch (error) {
+          alert("Error: " + error);
+        }
+      }
+    </script>
+    
+  </head>
+  <body class="flex flex-col min-h-screen bg-base-200">
+    
+<div class="navbar bg-base-100 shadow-lg sticky top-0 z-50">
+    <div class="navbar-start">
+        <div class="dropdown">
+            <label tabindex="0" class="btn btn-ghost lg:hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16"></path></svg>
+            </label>
+            <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                <li><a href="http://localhost:4200/dashboard">Dashboard</a></li>
+                <li><a href="http://localhost:4200/search">Search</a></li>
+                <li><a href="http://localhost:4200/discover">Discover</a></li>
+                <li><a href="http://localhost:4200/watches">Watches</a></li>
+                <li><a href="http://localhost:4200/blacklist">Blacklist</a></li>
+                <li><a href="http://localhost:4200/trawl">Trawl</a></li>
+                <li><a href="http://localhost:4200/settings">Settings</a></li>
+            </ul>
+        </div>
+        <a class="btn btn-ghost normal-case text-xl" href="http://localhost:4200/">dhtc</a>
+    </div>
+    <div class="navbar-center hidden lg:flex">
+        <ul class="menu menu-horizontal px-1 gap-1">
+            <li><a href="http://localhost:4200/dashboard" class="">Dashboard</a></li>
+            <li><a href="http://localhost:4200/search" class="active">Search</a></li>
+            <li><a href="http://localhost:4200/discover" class="">Discover</a></li>
+            <li><a href="http://localhost:4200/watches" class="">Watches</a></li>
+            <li><a href="http://localhost:4200/blacklist" class="">Blacklist</a></li>
+            <li><a href="http://localhost:4200/trawl" class="">Trawl</a></li>
+        </ul>
+    </div>
+    <div class="navbar-end">
+        <a href="http://localhost:4200/settings" class="btn btn-ghost btn-circle" title="Settings">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+        </a>
+    </div>
+</div>
+
+    <main class="flex-grow">
+<div class="container mx-auto p-4 md:p-8">
+    <div class="mb-8">
+        <h1 class="text-4xl font-extrabold tracking-tight">Search</h1>
+        <p class="text-base-content/60">Search through the collected torrent metadata</p>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl border border-base-300 mb-8">
+        <div class="card-body p-4 sm:p-6">
+            <form action="http://localhost:4200/search" method="post">
+                <div class="flex flex-col lg:flex-row gap-4 items-end mb-4">
+                    <div class="form-control w-full lg:w-48">
+                        <label class="label pt-0" for="search-key">
+                            <span class="label-text font-semibold">Field</span>
+                        </label>
+                        <select id="search-key" class="select select-bordered select-sm w-full pr-10" name="key">
+                            <option value="All">All</option>
+                            <option value="Name">Name</option>
+                            <option value="InfoHash">Info hash</option>
+                            <option value="Files">File name</option>
+                            <option value="DiscoveredOn">Date</option>
+                        </select>
+                    </div>
+
+                    <div class="form-control w-full lg:w-48">
+                        <label class="label pt-0" for="match-type">
+                            <span class="label-text font-semibold">Match Type</span>
+                        </label>
+                        <select id="match-type" class="select select-bordered select-sm w-full pr-10" name="match-type">
+                            <option value="contains">contains</option>
+                            <option value="equals">equals</option>
+                            <option value="startswith">starts with</option>
+                            <option value="endswith">ends with</option>
+                        </select>
+                    </div>
+
+                    <div class="form-control flex-grow w-full">
+                        <label class="label pt-0" for="search-input">
+                            <span class="label-text font-semibold">Search Query</span>
+                        </label>
+                        <div class="join w-full">
+                            <input id="search-input" type="text" placeholder="Search..." class="input input-bordered input-sm join-item w-full" name="search-input" value="">
+                            <button class="btn btn-primary btn-sm join-item px-6" type="submit">Search</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapse collapse-plus bg-base-200/30 border border-base-300 rounded-lg">
+                    <input id="advanced-filters-toggle" type="checkbox">
+                    <label for="advanced-filters-toggle" class="collapse-title text-sm font-medium py-2 min-h-0">
+                        Advanced Filters
+                    </label>
+                    <div class="collapse-content">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
+                            <div class="form-control w-full">
+                                <label class="label" for="min-size">
+                                    <span class="label-text text-xs">Min Size (bytes)</span>
+                                </label>
+                                <input id="min-size" type="number" name="min-size" class="input input-bordered input-sm" value="">
+                            </div>
+                            <div class="form-control w-full">
+                                <label class="label" for="max-size">
+                                    <span class="label-text text-xs">Max Size (bytes)</span>
+                                </label>
+                                <input id="max-size" type="number" name="max-size" class="input input-bordered input-sm" value="">
+                            </div>
+                            <div class="form-control w-full">
+                                <label class="label" for="start-date-val">
+                                    <span class="label-text text-xs">Start Date</span>
+                                </label>
+                                <input id="start-date-val" type="date" name="start-date-val" class="input input-bordered input-sm" value="">
+                            </div>
+                            <div class="form-control w-full">
+                                <label class="label" for="end-date-val">
+                                    <span class="label-text text-xs">End Date</span>
+                                </label>
+                                <input id="end-date-val" type="date" name="end-date-val" class="input input-bordered input-sm" value="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
+</div>
+</main>
+  
+  
+<script src="./dhtc_files/sortable.min.js.download"></script>
+
+
+
+</body></html>

@@ -26,7 +26,7 @@
 % query by date (in seconds), build the index
 ensure_date_index(Conn) ->
 	Spec = {key, {?DATE_COL, 1}},
-	mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+	mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 		mongo:ensure_index(?COLLNAME, Spec)
 	end).
 
@@ -37,7 +37,7 @@ insert(Conn, Hash, ReqCnt, UpSert) when is_list(Hash) ->
 	% only record today new inserted torrent
 	Cmd = {findAndModify, ?COLLNAME, query, {'_id', BHash, ?DATE_COL, DaySecs}, upsert, UpSert,
 		update, {'$inc', {reqs, ReqCnt}}, fields, {'_id', 1}},
-	IRet = mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+	IRet = mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 		mongo:command(Cmd)
 	end),
 	gen_server:cast(srv_name(), insert),
@@ -46,7 +46,7 @@ insert(Conn, Hash, ReqCnt, UpSert) when is_list(Hash) ->
 % [{ListHash, Req}, {ListHash, Req}]
 lookup(Conn, DaySecs, Count) ->
 	Sel = {'$query', {date, DaySecs}, '$orderby', {reqs, -1}},
-	List = mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+	List = mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 		Cursor = mongo:find(?COLLNAME, Sel, {'_id', 1, reqs, 1}, 0, Count), 
 		mongo_cursor:rest(Cursor)
 	end),
@@ -62,7 +62,7 @@ try_delete_oldest(Conn) ->
 	TodaySecs = time_util:now_day_seconds(),
 	DelDay = TodaySecs - ?DEL_DAY_BEFORE_SECS,
 	Sel = {date, {'$lte', DelDay}},
-	mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+	mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 		mongo:delete(?COLLNAME, Sel)
 	end).
 

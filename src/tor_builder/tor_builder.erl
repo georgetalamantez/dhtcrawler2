@@ -23,9 +23,9 @@
 -define(BATCHSIZE, 10).
 
 start_dep_apps() ->
-	code:add_path("deps/bson/ebin"),
-	code:add_path("deps/mongodb/ebin"),
-	code:add_path("deps/kdht/ebin"),
+	code:add_path("_build/default/lib/bson/ebin"),
+	code:add_path("_build/default/lib/mongodb/ebin"),
+	code:add_path("_build/default/lib/kdht/ebin"),
 	Apps = [asn1, crypto, public_key, ssl, inets, bson, mongodb],	
 	[application:start(App) || App <- Apps].
 
@@ -48,7 +48,7 @@ start_link(DBIP, DBPort, RootDir, WorkerCount) ->
 	gen_server:start_link({local, srv_name()}, ?MODULE, [DBIP, DBPort, RootDir, WorkerCount], []).
 
 start_link(RootDir) ->
-	start_link(localhost, 27017, RootDir, 100).
+	start_link(localhost, 27018, RootDir, 100).
 
 stop() ->
 	gen_server:cast(srv_name, stop).

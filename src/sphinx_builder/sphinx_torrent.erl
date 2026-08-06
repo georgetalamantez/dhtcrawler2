@@ -114,7 +114,7 @@ forward_date(Date) ->
 do_load_torrents(Date, Size) ->
 	Q = {created_at, {'$gt', Date, '$lte', Date + ?DATE_RANGE}},
 	Conn = mongo_pool:get(?POOLNAME),
-	mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+	mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 		% 1: cost lots of memory even close the cursor
 		%Cursor = mongo:find(?COLLNAME, {}, {}, Skip, Size),
 		%Ret = mongo_cursor:rest(Cursor), but close the cursor will reduce the memory
@@ -130,7 +130,7 @@ do_load_torrents(Date, Size) ->
 
 find_first_date(0) ->
 	Conn = mongo_pool:get(?POOLNAME),
-	Ret = mongo:do(safe, master, Conn, ?DBNAME, fun() ->
+	Ret = mongo:do(unsafe, master, Conn, ?DBNAME, fun() ->
 		mongo:find_one(?COLLNAME, {})
 	end),
 	case Ret of

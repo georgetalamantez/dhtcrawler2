@@ -24,11 +24,12 @@ on_updated(Conn) ->
 
 load_delete_doc(Conn, Col) ->
 	Cmd = {findAndModify, Col, fields, {}, remove, true},
-	Ret = mongo:do(safe, master, Conn, ?HASH_DBNAME, fun() ->
+	Ret = mongo:do(unsafe, master, Conn, ?HASH_DBNAME, fun() ->
 		mongo:command(Cmd)
 	end),
-	case Ret of
-		{value, undefined, ok, 1.0} -> {};
-		{value, Obj, lastErrorObject, _, ok, 1.0} -> {Obj}
+	case bson:lookup(value, Ret) of
+		{null} -> {};
+		{undefined} -> {};
+		{Obj} -> {Obj}
 	end.
 

@@ -44,6 +44,10 @@
                         <option value="hash">InfoHash</option>
                         <option value="file">File Contents</option>
                     </select>
+                    <select id="search-sort" class="select select-bordered w-full md:w-48 text-base font-semibold">
+                        <option value="desc">Newest First</option>
+                        <option value="asc">Oldest First</option>
+                    </select>
                     <div class="join w-full">
                         <input type="text" id="search-input" placeholder="Search..." class="input input-bordered join-item w-full" autofocus />
                         <button type="submit" id="search-btn" class="btn btn-primary join-item">
@@ -70,6 +74,7 @@
         const form = document.getElementById('search-form');
         const input = document.getElementById('search-input');
         const typeSelect = document.getElementById('search-type');
+        const sortSelect = document.getElementById('search-sort');
         const btn = document.getElementById('search-btn');
         const spinner = document.getElementById('search-spinner');
         const resultsContainer = document.getElementById('results-container');
@@ -113,6 +118,7 @@
             if (!q) return;
 
             const type = typeSelect.value;
+            const sort = sortSelect.value;
             
             // Set loading state
             btn.disabled = true;
@@ -121,7 +127,7 @@
             resultsMeta.classList.add('hidden');
 
             try {
-                const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&type=${type}`);
+                const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&type=${type}&sort=${sort}`);
                 const data = await res.json();
                 
                 resultsMeta.classList.remove('hidden');

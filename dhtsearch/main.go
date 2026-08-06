@@ -155,7 +155,15 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 
 	wg.Wait()
 
+	sortDir := r.URL.Query().Get("sort")
+	if sortDir == "" {
+		sortDir = "desc" // default to newest first
+	}
+
 	sort.Slice(results, func(i, j int) bool {
+		if sortDir == "asc" {
+			return results[i].DiscoveredOn < results[j].DiscoveredOn
+		}
 		return results[i].DiscoveredOn > results[j].DiscoveredOn
 	})
 

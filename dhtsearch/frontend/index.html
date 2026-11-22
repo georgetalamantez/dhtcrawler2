@@ -43,6 +43,7 @@
                         <option value="name">Torrent Name</option>
                         <option value="hash">InfoHash</option>
                         <option value="file">File Contents</option>
+                        <option value="ext">File Extension</option>
                     </select>
                     <select id="search-sort" class="select select-bordered w-full md:w-48 text-base font-semibold">
                         <option value="desc">Newest First</option>
@@ -196,7 +197,7 @@
                     let filesHtml = '';
                     if (item.Files && item.Files.length > 0) {
                         let innerFiles = item.Files.map(f => {
-                            let fPath = type === 'file' ? highlight(f.Path, currentQuery) : escapeHtml(f.Path);
+                            let fPath = (type === 'file' || type === 'ext') ? highlight(f.Path, currentQuery) : escapeHtml(f.Path);
                             return `
                                 <div class="flex justify-between items-center py-1 border-b border-base-200 last:border-0 hover:bg-base-200 transition-colors px-2 rounded">
                                     <span class="text-sm truncate mr-4" title="${escapeHtml(f.Path)}">${fPath}</span>

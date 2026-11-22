@@ -46,8 +46,8 @@ func main() {
 	http.HandleFunc("/api/stats", statsHandler)
 	http.HandleFunc("/search/", esProxyHandler)
 
-	fmt.Println("Server started on http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	fmt.Println("Server started on http://localhost:8081")
+	log.Fatal(http.ListenAndServe(":8081", nil))
 }
 
 func esProxyHandler(w http.ResponseWriter, r *http.Request) {
@@ -113,19 +113,32 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	fields := []string{"title"}
 	if sType == "hash" {
 		fields = []string{"infohash"}
-	} else if sType == "file" {
+	} else if sType == "file" || sType == "ext" {
 		fields = []string{"files.Path"}
 	}
 	
-	esQuery := map[string]interface{}{
-		"from": offset,
-		"size": limit,
-		"query": map[string]interface{}{
+	var queryObj map[string]interface{}
+	if sType == "ext" {
+		ext := strings.TrimPrefix(q, ".")
+		queryObj = map[string]interface{}{
+			"query_string": map[string]interface{}{
+				"query": "*." + ext,
+				"fields": fields,
+			},
+		}
+	} else {
+		queryObj = map[string]interface{}{
 			"multi_match": map[string]interface{}{
 				"query": q,
 				"fields": fields,
 			},
-		},
+		}
+	}
+
+	esQuery := map[string]interface{}{
+		"from": offset,
+		"size": limit,
+		"query": queryObj,
 		"sort": []map[string]interface{}{
 			{
 				"discovered_on": map[string]interface{}{
